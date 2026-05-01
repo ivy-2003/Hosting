@@ -1,0 +1,2001 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>NutriMatch — RND Clinical Interface</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --green:#00674F;--green-light:#00896A;--green-dark:#004D3A;--green-muted:#E6F2EF;
+  --gold:#EFBF04;--gold-light:#F5D04A;--gold-dark:#C49D00;--gold-muted:#FEF9E0;
+  --cream:#FDFBD4;--cream-bg:#FFFEF9;--cream-dark:#F0EDA0;--cream-border:#DDD98A;
+  --navy:#004D3A;--navy-light:#00674F;--navy-dark:#003328;--navy-muted:#E6F2EF;
+  --white:#FFFFFF;--gray50:#F9FAFB;--gray100:#F3F4F6;--gray200:#E5E7EB;
+  --gray400:#9CA3AF;--gray600:#6B7280;--gray800:#1F2937;
+  --sidebar-w:256px;--header-h:64px;
+  --radius:8px;--radius-lg:12px;--radius-xl:18px;
+  --shadow:0 1px 3px rgba(0,0,0,.08),0 1px 2px rgba(0,0,0,.04);
+  --shadow-md:0 4px 12px rgba(0,0,0,.10);
+}
+body{font-family:'DM Sans',sans-serif;background:#FFFEF9;color:var(--green-dark);min-height:100vh;display:flex;overflow:hidden}
+
+/* ─── SIDEBAR ─── */
+.sidebar{width:var(--sidebar-w);min-height:100vh;background:var(--green-dark);display:flex;flex-direction:column;position:fixed;left:0;top:0;bottom:0;z-index:100;transition:width .25s ease}
+.sidebar-logo{padding:20px 20px 16px;border-bottom:1px solid rgba(253,251,212,.10)}
+.logo-mark{display:flex;align-items:center;gap:10px;margin-bottom:4px}
+.logo-leaf{width:36px;height:36px;background:linear-gradient(135deg,var(--gold-dark) 0%,var(--gold) 100%);border-radius:10px 2px 10px 2px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.logo-leaf svg{width:20px;height:20px;fill:var(--green-dark)}
+.logo-text{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:var(--cream);letter-spacing:-.3px}
+.logo-sub{font-size:10px;color:rgba(253,251,212,.45);letter-spacing:1.5px;text-transform:uppercase;font-weight:500;padding-left:2px}
+.rnd-badge{display:inline-flex;align-items:center;gap:5px;background:rgba(239,191,4,.15);border:1px solid rgba(239,191,4,.35);border-radius:20px;padding:3px 10px;margin-top:10px}
+.rnd-badge span{font-size:10px;color:var(--gold);font-weight:600;letter-spacing:.5px;text-transform:uppercase}
+.rnd-dot{width:6px;height:6px;background:var(--gold);border-radius:50%}
+
+.sidebar-nav{flex:1;overflow-y:auto;padding:12px 0;scrollbar-width:thin;scrollbar-color:rgba(253,251,212,.1) transparent}
+.nav-section{padding:14px 16px 6px;font-size:9.5px;letter-spacing:1.8px;text-transform:uppercase;color:rgba(253,251,212,.28);font-weight:600}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 16px;cursor:pointer;transition:all .18s ease;position:relative;text-decoration:none;color:rgba(253,251,212,.60);font-size:13.5px;font-weight:400;letter-spacing:.1px;margin:1px 8px;border-radius:8px}
+.nav-item:hover{background:rgba(239,191,4,.08);color:rgba(253,251,212,.9)}
+.nav-item.active{background:linear-gradient(135deg,rgba(239,191,4,.18) 0%,rgba(239,191,4,.08) 100%);color:var(--cream);font-weight:500;border:1px solid rgba(239,191,4,.22)}
+.nav-item.active::before{content:'';position:absolute;left:-8px;top:50%;transform:translateY(-50%);width:3px;height:22px;background:var(--gold);border-radius:0 3px 3px 0}
+.nav-icon{width:18px;height:18px;flex-shrink:0;opacity:.65}
+.nav-item.active .nav-icon{opacity:1;color:var(--gold)}
+.nav-badge{margin-left:auto;background:var(--gold);color:var(--green-dark);font-size:10px;font-weight:700;padding:1px 6px;border-radius:10px;min-width:18px;text-align:center}
+
+.sidebar-footer{padding:16px;border-top:1px solid rgba(253,251,212,.08)}
+.user-card{display:flex;align-items:center;gap:10px;padding:8px;border-radius:8px;cursor:pointer;transition:background .18s}
+.user-card:hover{background:rgba(239,191,4,.08)}
+.avatar{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--gold-dark) 0%,var(--gold) 100%);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:var(--green-dark);flex-shrink:0}
+.user-info{flex:1;min-width:0}
+.user-name{font-size:13px;font-weight:500;color:var(--cream);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.user-role{font-size:11px;color:rgba(253,251,212,.38)}
+
+/* ─── MAIN ─── */
+.main{margin-left:var(--sidebar-w);flex:1;display:flex;flex-direction:column;min-height:100vh;background:#FFFEF9;overflow:hidden}
+.topbar{height:var(--header-h);background:rgba(255,254,249,.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--cream-border);display:flex;align-items:center;justify-content:space-between;padding:0 28px;position:sticky;top:0;z-index:50}
+.topbar-left{display:flex;flex-direction:column}
+.page-title{font-family:'Playfair Display',serif;font-size:20px;font-weight:600;color:var(--green-dark);letter-spacing:-.3px;line-height:1}
+.page-breadcrumb{font-size:11.5px;color:var(--gray600);margin-top:2px}
+.topbar-right{display:flex;align-items:center;gap:12px}
+.topbar-btn{width:36px;height:36px;border-radius:8px;border:1px solid var(--cream-border);background:rgba(255,255,255,.7);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .18s;color:var(--green-dark)}
+.topbar-btn:hover{background:var(--white);border-color:var(--green-muted)}
+.notif-dot{position:relative}
+.notif-dot::after{content:'';position:absolute;top:7px;right:7px;width:6px;height:6px;background:var(--gold);border-radius:50%;border:1.5px solid #FFFEF9}
+.topbar-search{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.7);border:1px solid var(--cream-border);border-radius:8px;padding:0 12px;height:36px;min-width:200px}
+.topbar-search input{border:none;background:transparent;font-size:13px;color:var(--green-dark);outline:none;font-family:'DM Sans',sans-serif;width:100%}
+.topbar-search input::placeholder{color:var(--gray400)}
+
+/* ─── PAGE CONTENT ─── */
+.page{display:none;flex:1;overflow-y:auto;padding:24px 28px;animation:fadeIn .2s ease}
+.page.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+
+/* ─── COMMON ─── */
+.section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+.section-title{font-family:'Playfair Display',serif;font-size:17px;font-weight:600;color:var(--green-dark)}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;border:none;font-family:'DM Sans',sans-serif;transition:all .18s;letter-spacing:.1px}
+.btn-primary{background:var(--green);color:var(--cream)}
+.btn-primary:hover{background:var(--green-light)}
+.btn-gold{background:var(--gold);color:var(--green-dark)}
+.btn-gold:hover{background:var(--gold-light)}
+.btn-outline{background:transparent;border:1.5px solid var(--green);color:var(--green)}
+.btn-outline:hover{background:var(--green-muted)}
+.btn-sm{padding:5px 12px;font-size:12px}
+.card{background:var(--white);border-radius:var(--radius-lg);border:1px solid var(--gray200);padding:20px;box-shadow:var(--shadow)}
+.card-sm{padding:14px 16px}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.tag{display:inline-flex;align-items:center;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:500}
+.tag-green{background:var(--green-muted);color:var(--green-dark)}
+.tag-gold{background:var(--gold-muted);color:#8B6D00}
+.tag-blue{background:#E6F2EF;color:var(--green-dark)}
+.tag-red{background:#FEE2E2;color:#991B1B}
+.tag-gray{background:var(--gray100);color:var(--gray600)}
+.divider{height:1px;background:var(--cream-border);margin:16px 0}
+
+/* ─── DASHBOARD ─── */
+.dash-stat{display:flex;flex-direction:column;gap:4px}
+.stat-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:8px}
+.stat-val{font-family:'Playfair Display',serif;font-size:28px;font-weight:700;color:var(--green-dark);line-height:1}
+.stat-label{font-size:12px;color:var(--gray600);font-weight:400}
+.stat-change{font-size:11px;font-weight:500;margin-top:2px}
+.stat-up{color:var(--green)}.stat-down{color:#DC2626}
+
+.appt-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--gray100)}
+.appt-row:last-child{border-bottom:none}
+.appt-time{font-family:'DM Mono',monospace;font-size:12px;color:var(--gray600);min-width:50px}
+.appt-avatar{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;flex-shrink:0}
+.appt-name{font-size:13px;font-weight:500;color:var(--green-dark)}
+.appt-type{font-size:11.5px;color:var(--gray600)}
+.appt-status{margin-left:auto}
+
+.activity-item{display:flex;align-items:flex-start;gap:10px;padding:8px 0}
+.act-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:5px}
+.act-text{font-size:12.5px;color:var(--gray600);line-height:1.5}
+.act-time{font-size:11px;color:var(--gray400);margin-top:2px}
+
+.progress-ring{position:relative;display:inline-flex;align-items:center;justify-content:center}
+.ring-label{position:absolute;text-align:center}
+.ring-val{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:var(--green-dark)}
+.ring-sub{font-size:10px;color:var(--gray600)}
+
+/* ─── PATIENTS ─── */
+.patient-table{width:100%;border-collapse:collapse}
+.patient-table th{text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--gray600);font-weight:600;padding:10px 14px;border-bottom:2px solid var(--cream-border);background:var(--cream-bg)}
+.patient-table td{padding:13px 14px;border-bottom:1px solid var(--gray100);font-size:13.5px;color:var(--green-dark);vertical-align:middle}
+.patient-table tr:hover td{background:var(--green-muted)}
+.pt-avatar{width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;flex-shrink:0}
+.pt-cell{display:flex;align-items:center;gap:10px}
+.pt-name{font-weight:500}
+.pt-id{font-family:'DM Mono',monospace;font-size:11px;color:var(--gray400)}
+.filter-bar{display:flex;align-items:center;gap:10px;margin-bottom:18px;flex-wrap:wrap}
+.search-box{flex:1;min-width:200px;display:flex;align-items:center;gap:8px;background:var(--white);border:1px solid var(--cream-border);border-radius:8px;padding:0 12px;height:36px}
+.search-box input{border:none;outline:none;font-size:13px;font-family:'DM Sans',sans-serif;width:100%;color:var(--green-dark)}
+.filter-select{height:36px;border:1px solid var(--cream-border);border-radius:8px;font-size:13px;padding:0 10px;font-family:'DM Sans',sans-serif;background:var(--white);color:var(--green-dark);cursor:pointer}
+
+/* ─── APPOINTMENTS ─── */
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-bottom:20px}
+.cal-header{text-align:center;font-size:11px;font-weight:600;color:var(--green-dark);text-transform:uppercase;letter-spacing:.8px;padding:6px 0}
+.cal-day{aspect-ratio:1;border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:6px;background:var(--white);border:1px solid var(--cream-border);cursor:pointer;transition:all .15s;position:relative}
+.cal-day:hover{border-color:var(--green);background:var(--green-muted)}
+.cal-day.today{border-color:var(--gold);background:var(--gold-muted)}
+.cal-day.has-appt::after{content:'';width:5px;height:5px;background:var(--green);border-radius:50%;position:absolute;bottom:5px;left:50%;transform:translateX(-50%)}
+.cal-day.other-month{opacity:.35}
+.cal-num{font-size:12px;font-weight:500;color:var(--green-dark)}
+.cal-day.today .cal-num{color:var(--gold-dark);font-weight:700}
+
+.appt-list-item{display:flex;gap:14px;padding:14px;border-radius:10px;background:var(--white);border:1px solid var(--cream-border);margin-bottom:10px;cursor:pointer;transition:all .15s}
+.appt-list-item:hover{border-color:var(--green);box-shadow:var(--shadow)}
+.appt-time-block{text-align:center;min-width:48px}
+.appt-hr{font-family:'Playfair Display',serif;font-size:18px;font-weight:600;color:var(--green-dark)}
+.appt-ampm{font-size:10px;color:var(--gray600)}
+.appt-details{flex:1}
+.appt-patient{font-size:14px;font-weight:500;color:var(--green-dark);margin-bottom:2px}
+.appt-meta{font-size:12px;color:var(--gray600)}
+.appt-stripe{width:4px;border-radius:4px;flex-shrink:0}
+
+/* ─── NCP RECORDS ─── */
+.ncp-phase{display:flex;align-items:flex-start;gap:14px;padding:16px;background:var(--white);border:1px solid var(--cream-border);border-radius:10px;margin-bottom:10px}
+.phase-num{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:justify-center;font-size:13px;font-weight:700;flex-shrink:0}
+.phase-title{font-size:14px;font-weight:500;color:var(--green-dark);margin-bottom:3px}
+.phase-desc{font-size:12.5px;color:var(--gray600);line-height:1.5}
+.phase-status{margin-left:auto;flex-shrink:0}
+
+/* ─── MEAL PLANNING ─── */
+.meal-day{background:var(--white);border:1px solid var(--cream-border);border-radius:10px;overflow:hidden}
+.meal-day-header{background:var(--green-dark);padding:10px 14px;display:flex;justify-content:space-between;align-items:center}
+.meal-day-name{font-size:12px;font-weight:600;color:var(--cream);text-transform:uppercase;letter-spacing:.8px}
+.meal-day-cal{font-size:11px;color:var(--gold)}
+.meal-slot{padding:10px 14px;border-bottom:1px solid var(--gray100)}
+.meal-slot:last-child{border-bottom:none}
+.meal-time{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;color:var(--green);margin-bottom:4px}
+.meal-food{font-size:12.5px;color:var(--green-dark)}
+.meal-macros{font-size:11px;color:var(--gray600);margin-top:2px;font-family:'DM Mono',monospace}
+
+.macro-bar{display:flex;height:8px;border-radius:4px;overflow:hidden;gap:2px;margin-top:6px}
+.macro-seg{border-radius:4px}
+.macro-legend{display:flex;gap:14px;margin-top:8px}
+.legend-item{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--gray600)}
+.legend-dot{width:8px;height:8px;border-radius:2px;flex-shrink:0}
+
+/* ─── PROGRESS REPORTS ─── */
+.metric-trend{display:flex;align-items:center;gap:8px;padding:12px;background:var(--white);border:1px solid var(--cream-border);border-radius:10px}
+.trend-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.trend-label{font-size:12px;color:var(--gray600)}
+.trend-val{font-size:18px;font-weight:600;color:var(--green-dark);font-family:'DM Mono',monospace}
+.trend-change{font-size:11px;margin-top:1px}
+.chart-placeholder{height:160px;background:#FFFEF9;border-radius:8px;display:flex;align-items:center;justify-content:center;border:1px solid var(--cream-border);position:relative;overflow:hidden}
+.chart-bars{display:flex;align-items:flex-end;gap:6px;height:100%;padding:16px;width:100%}
+.bar{flex:1;border-radius:4px 4px 0 0;transition:height .3s ease;min-height:4px}
+
+/* ─── RESOURCE LIBRARY ─── */
+.resource-card{background:var(--white);border:1px solid var(--cream-border);border-radius:10px;padding:16px;cursor:pointer;transition:all .18s}
+.resource-card:hover{border-color:var(--green);transform:translateY(-2px);box-shadow:var(--shadow-md)}
+.resource-icon{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;margin-bottom:12px;font-size:20px}
+.resource-title{font-size:14px;font-weight:500;color:var(--green-dark);margin-bottom:4px}
+.resource-desc{font-size:12px;color:var(--gray600);line-height:1.5}
+.resource-meta{display:flex;align-items:center;gap:8px;margin-top:10px}
+.resource-type{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.8px}
+
+/* ─── BILLING ─── */
+.invoice-row{display:grid;grid-template-columns:auto 1fr auto auto;gap:14px;align-items:center;padding:12px 14px;background:var(--white);border:1px solid var(--cream-border);border-radius:8px;margin-bottom:8px;cursor:pointer;transition:all .15s}
+.invoice-row:hover{border-color:var(--green)}
+.inv-num{font-family:'DM Mono',monospace;font-size:12px;color:var(--gray600)}
+.inv-patient{font-size:13.5px;font-weight:500;color:var(--green-dark)}
+.inv-service{font-size:12px;color:var(--gray600)}
+.inv-amount{font-family:'DM Mono',monospace;font-size:14px;font-weight:600;color:var(--green-dark);text-align:right}
+.billing-stat{text-align:center;padding:16px}
+.billing-stat-val{font-family:'Playfair Display',serif;font-size:26px;font-weight:700;color:var(--green-dark)}
+.billing-stat-label{font-size:12px;color:var(--gray600);margin-top:2px}
+
+/* ─── SETTINGS ─── */
+.settings-nav{display:flex;gap:4px;border-bottom:2px solid var(--cream-border);margin-bottom:20px;overflow-x:auto}
+.s-tab{padding:10px 16px;font-size:13px;font-weight:500;color:var(--gray600);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .15s;white-space:nowrap}
+.s-tab.active{color:var(--green);border-bottom-color:var(--green)}
+.s-tab:hover{color:var(--green-dark)}
+.setting-row{display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid var(--gray100)}
+.setting-row:last-child{border-bottom:none}
+.setting-label{font-size:14px;font-weight:500;color:var(--green-dark)}
+.setting-desc{font-size:12px;color:var(--gray600);margin-top:2px}
+.toggle{width:42px;height:24px;border-radius:12px;background:var(--gray200);position:relative;cursor:pointer;transition:background .2s;flex-shrink:0}
+.toggle.on{background:var(--green)}
+.toggle::after{content:'';width:18px;height:18px;border-radius:50%;background:var(--white);position:absolute;top:3px;left:3px;transition:left .2s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.toggle.on::after{left:21px}
+.input-field{border:1px solid var(--cream-border);border-radius:8px;padding:8px 12px;font-size:13px;font-family:'DM Sans',sans-serif;color:var(--green-dark);background:var(--white);width:100%;outline:none;transition:border .18s}
+.input-field:focus{border-color:var(--green)}
+.form-label{font-size:12px;font-weight:600;color:var(--gray600);text-transform:uppercase;letter-spacing:.6px;margin-bottom:5px;display:block}
+
+/* ─── SCROLLBARS ─── */
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(0,103,79,.18);border-radius:3px}
+
+/* ─── RESPONSIVE GRID ─── */
+@media(max-width:1200px){.grid-4{grid-template-columns:repeat(2,1fr)}.grid-3{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-mark">
+      <div class="logo-leaf">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M17 8C8 10 5.9 16.17 3.82 21.34c5.44-5.98 12.34-8.24 13.18-13.34zM12 2a9.96 9.96 0 0 0-7.07 2.93C7 6 8.5 6 10 5c-1 3-4 4.5-4 9 0 5.52 4.48 10 10 10S26 19.52 26 14C26 7.37 19.63 2 12 2z"/></svg>
+      </div>
+      <span class="logo-text">NutriMatch</span>
+    </div>
+    <div class="logo-sub">Clinical Nutrition System</div>
+    <div class="rnd-badge"><div class="rnd-dot"></div><span>RND Portal</span></div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section">Main</div>
+    <a class="nav-item active" onclick="navigate('dashboard',this)">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      Dashboard
+    </a>
+    <a class="nav-item" onclick="navigate('patients',this)">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      My Patients
+      <span class="nav-badge">24</span>
+    </a>
+    <a class="nav-item" onclick="navigate('appointments',this)">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      Appointments
+      <span class="nav-badge">3</span>
+    </a>
+    <div class="nav-section">Clinical</div>
+    <a class="nav-item" onclick="navigate('ncp',this)">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z"/></svg>
+      NCP Records
+    </a>
+    <a class="nav-item" onclick="navigate('meals',this)">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/><path d="M8 12H4m16 0h-4"/></svg>
+      Meal Planning
+    </a>
+    <a class="nav-item" onclick="navigate('progress',this)">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      Progress Reports
+    </a>
+    <div class="nav-section">Resources</div>
+    <a class="nav-item" onclick="navigate('library',this)">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+      Resource Library
+    </a>
+    <a class="nav-item" onclick="navigate('billing',this)">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 1 0 0 7h5a3.5 3.5 0 1 1 0 7H6"/></svg>
+      Billing
+    </a>
+    <a class="nav-item" onclick="navigate('settings',this)">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      Settings
+    </a>
+  </nav>
+  <div class="sidebar-footer">
+    <!-- User Profile Card -->
+    <div onclick="navigate('settings',this)" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;cursor:pointer;transition:background .18s;margin-bottom:6px" onmouseover="this.style.background='rgba(239,191,4,.08)'" onmouseout="this.style.background='transparent'">
+      <div class="avatar">KP</div>
+      <div class="user-info">
+        <div class="user-name">Kristine Perez, RND</div>
+        <div class="user-role">Clinical Dietitian · Active</div>
+      </div>
+      <svg style="width:13px;height:13px;color:rgba(253,251,212,.3);flex-shrink:0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    </div>
+    <!-- Sign Out Button -->
+    <button onclick="openModal('signout-modal')" style="width:100%;display:flex;align-items:center;gap:9px;padding:9px 12px;border-radius:10px;background:rgba(220,38,38,.08);border:1px solid rgba(220,38,38,.18);cursor:pointer;transition:all .18s;color:rgba(253,80,80,.85);font-family:'DM Sans',sans-serif;font-size:12.5px;font-weight:500" onmouseover="this.style.background='rgba(220,38,38,.16)'" onmouseout="this.style.background='rgba(220,38,38,.08)'">
+      <svg style="width:15px;height:15px;flex-shrink:0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      Sign Out
+      <span style="margin-left:auto;font-size:10px;opacity:.5">v1.0.0</span>
+    </button>
+  </div>
+</aside>
+
+<!-- MAIN CONTENT -->
+<main class="main">
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="topbar-left">
+      <div class="page-title" id="page-title">Dashboard</div>
+      <div class="page-breadcrumb" id="page-breadcrumb">NutriMatch › Dashboard</div>
+    </div>
+    <div class="topbar-right">
+      <div class="topbar-search">
+        <svg style="width:14px;height:14px;color:#9CA3AF;flex-shrink:0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" placeholder="Search patients, records..."/>
+      </div>
+      <div class="topbar-btn notif-dot">
+        <svg style="width:16px;height:16px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+      </div>
+      <div class="topbar-btn">
+        <svg style="width:16px;height:16px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ PAGE: DASHBOARD ══ -->
+  <div class="page active" id="page-dashboard">
+
+    <!-- ── Sub-nav Tabs ── -->
+    <div style="display:flex;align-items:flex-end;gap:2px;margin-bottom:18px;border-bottom:2px solid var(--cream-border);">
+      <button onclick="switchDash('dash-main',this)" class="dtab active-dtab" style="padding:9px 22px;border:none;background:#00674F;color:#FDFBD4;border-radius:8px 8px 0 0;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;margin-bottom:-2px;border-bottom:2px solid #00674F;">Dashboard</button>
+      <button onclick="switchDash('dash-sched',this)" class="dtab" style="padding:9px 22px;border:none;background:transparent;color:var(--gray600);border-radius:8px 8px 0 0;font-size:13px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;margin-bottom:-2px;border-bottom:2px solid transparent;transition:all .15s;">My Schedule</button>
+      <button onclick="switchDash('dash-ann',this)" class="dtab" style="padding:9px 22px;border:none;background:transparent;color:var(--gray600);border-radius:8px 8px 0 0;font-size:13px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;margin-bottom:-2px;border-bottom:2px solid transparent;display:flex;align-items:center;gap:6px;transition:all .15s;">Announcements<span style="background:#EFBF04;color:#003328;font-size:10px;font-weight:700;padding:1px 6px;border-radius:10px;line-height:1.4">5</span></button>
+      <button onclick="switchDash('dash-rep',this)" class="dtab" style="padding:9px 22px;border:none;background:transparent;color:var(--gray600);border-radius:8px 8px 0 0;font-size:13px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;margin-bottom:-2px;border-bottom:2px solid transparent;transition:all .15s;">Reports</button>
+    </div>
+
+    <!-- ══ TAB: DASHBOARD ══ -->
+    <div id="dash-main" style="display:grid;grid-template-columns:1fr 290px;gap:18px;align-items:start;">
+
+      <!-- ── LEFT COLUMN ── -->
+      <div style="display:flex;flex-direction:column;gap:18px;">
+
+        <!-- Welcome Carousel -->
+        <div style="border-radius:16px;overflow:hidden;box-shadow:0 4px 20px rgba(0,77,58,.14);position:relative;">
+          <div style="background:linear-gradient(118deg,#003328 0%,#004D3A 45%,#00674F 80%,#00896A 100%);padding:30px 32px;display:flex;align-items:center;justify-content:space-between;min-height:170px;position:relative;overflow:hidden;">
+            <div style="position:absolute;right:-20px;top:-20px;width:180px;height:180px;border-radius:50%;background:rgba(239,191,4,.07);pointer-events:none;"></div>
+            <div style="position:absolute;right:160px;bottom:-60px;width:140px;height:140px;border-radius:50%;background:rgba(255,255,255,.04);pointer-events:none;"></div>
+            <div style="position:relative;z-index:1;max-width:420px;">
+              <div style="display:inline-flex;align-items:center;gap:5px;background:rgba(239,191,4,.18);border:1px solid rgba(239,191,4,.4);border-radius:20px;padding:3px 10px;margin-bottom:10px;">
+                <span style="width:5px;height:5px;background:#EFBF04;border-radius:50%;display:inline-block;"></span>
+                <span style="font-size:10px;color:#EFBF04;font-weight:600;letter-spacing:1px;text-transform:uppercase;">Monday, April 27, 2026</span>
+              </div>
+              <div style="font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:#fff;margin-bottom:6px;">Good morning, Kristine! &#127807;</div>
+              <div style="font-size:13px;color:rgba(255,254,249,.6);line-height:1.7;margin-bottom:14px;">You have <span style="color:#EFBF04;font-weight:600;">3 consultations</span> today and <span style="color:#EFBF04;font-weight:600;">2 NCP records</span> pending completion.</div>
+              <div style="display:flex;gap:8px;">
+                <button onclick="openModal('patient-modal')" style="padding:8px 18px;background:#EFBF04;color:#003328;border:none;border-radius:8px;font-size:12.5px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;">+ New Patient</button>
+                <button onclick="openModal('appt-modal')" style="padding:8px 18px;background:rgba(255,255,255,.12);color:#FDFBD4;border:1px solid rgba(255,255,255,.2);border-radius:8px;font-size:12.5px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;">Schedule Visit</button>
+              </div>
+            </div>
+            <!-- Mini weekly bars -->
+            <div style="position:relative;z-index:1;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:13px 16px;min-width:175px;">
+              <div style="font-size:9.5px;color:rgba(253,251,212,.45);text-transform:uppercase;letter-spacing:1px;font-weight:600;margin-bottom:9px;">This Week</div>
+              <div style="display:flex;align-items:flex-end;gap:5px;height:42px;">
+                <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;"><div style="width:100%;background:rgba(239,191,4,.4);border-radius:2px 2px 0 0;height:60%;"></div><span style="font-size:8px;color:rgba(253,251,212,.35);">M</span></div>
+                <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;"><div style="width:100%;background:rgba(239,191,4,.4);border-radius:2px 2px 0 0;height:88%;"></div><span style="font-size:8px;color:rgba(253,251,212,.35);">T</span></div>
+                <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;"><div style="width:100%;background:rgba(239,191,4,.4);border-radius:2px 2px 0 0;height:48%;"></div><span style="font-size:8px;color:rgba(253,251,212,.35);">W</span></div>
+                <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;"><div style="width:100%;background:rgba(239,191,4,.4);border-radius:2px 2px 0 0;height:72%;"></div><span style="font-size:8px;color:rgba(253,251,212,.35);">T</span></div>
+                <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;"><div style="width:100%;background:#EFBF04;border-radius:2px 2px 0 0;height:55%;box-shadow:0 0 6px rgba(239,191,4,.5);"></div><span style="font-size:8px;color:#EFBF04;font-weight:700;">F</span></div>
+                <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;"><div style="width:100%;background:rgba(239,191,4,.15);border-radius:2px 2px 0 0;height:18%;"></div><span style="font-size:8px;color:rgba(253,251,212,.25);">S</span></div>
+                <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;"><div style="width:100%;background:rgba(239,191,4,.08);border-radius:2px 2px 0 0;height:8%;"></div><span style="font-size:8px;color:rgba(253,251,212,.25);">S</span></div>
+              </div>
+              <div style="border-top:1px solid rgba(255,255,255,.08);margin-top:9px;padding-top:7px;display:flex;justify-content:space-between;align-items:center;">
+                <div><div style="font-family:'Playfair Display',serif;font-size:17px;font-weight:700;color:#EFBF04;">18</div><div style="font-size:9px;color:rgba(253,251,212,.35);">consultations</div></div>
+                <span style="font-size:11px;color:rgba(255,255,255,.5);font-weight:600;">&#x2191; 12%</span>
+              </div>
+            </div>
+          </div>
+          <!-- Carousel footer bar -->
+          <div style="background:#004D3A;padding:8px 18px;display:flex;align-items:center;justify-content:space-between;">
+            <div style="display:flex;align-items:center;gap:5px;">
+              <div style="width:20px;height:5px;background:#EFBF04;border-radius:3px;"></div>
+              <div style="width:5px;height:5px;background:rgba(255,255,255,.22);border-radius:50%;"></div>
+              <div style="width:5px;height:5px;background:rgba(255,255,255,.22);border-radius:50%;"></div>
+            </div>
+            <div style="display:flex;gap:5px;">
+              <button onclick="showToast('Previous','&#9664;')" style="width:24px;height:24px;background:rgba(255,255,255,.1);border:none;border-radius:5px;color:#FDFBD4;cursor:pointer;font-size:11px;">&#9664;</button>
+              <button onclick="showToast('Next','&#9654;')" style="width:24px;height:24px;background:rgba(255,255,255,.1);border:none;border-radius:5px;color:#FDFBD4;cursor:pointer;font-size:11px;">&#9654;</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- KPI Cards -->
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:11px;">
+          <div onclick="navigate('patients',document.querySelector('[onclick*=patients]'))" style="background:#fff;border-radius:13px;padding:15px;border:1px solid var(--cream-border);box-shadow:0 2px 8px rgba(0,103,79,.06);cursor:pointer;transition:all .18s;position:relative;overflow:hidden;" onmouseover="this.style.borderColor='#00674F';this.style.transform='translateY(-2px)';" onmouseout="this.style.borderColor='var(--cream-border)';this.style.transform='translateY(0)';">
+            <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#00674F,#00896A);border-radius:13px 13px 0 0;"></div>
+            <div style="width:36px;height:36px;background:#E6F2EF;border-radius:9px;display:flex;align-items:center;justify-content:center;margin-bottom:9px;">
+              <svg style="width:17px;height:17px;color:#00674F;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            </div>
+            <div style="font-family:'Playfair Display',serif;font-size:28px;font-weight:700;color:#003328;line-height:1;margin-bottom:3px;">24</div>
+            <div style="font-size:11px;color:var(--gray600);font-weight:500;margin-bottom:7px;">Active Patients</div>
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <div style="height:3px;flex:1;background:#E6F2EF;border-radius:2px;margin-right:6px;"><div style="width:80%;height:100%;background:#00674F;border-radius:2px;"></div></div>
+              <span style="font-size:9.5px;font-weight:600;color:#00674F;white-space:nowrap;">&#x2191; 3 new</span>
+            </div>
+          </div>
+
+          <div onclick="navigate('appointments',document.querySelector('[onclick*=appointments]'))" style="background:#fff;border-radius:13px;padding:15px;border:1px solid var(--cream-border);box-shadow:0 2px 8px rgba(196,157,0,.06);cursor:pointer;transition:all .18s;position:relative;overflow:hidden;" onmouseover="this.style.borderColor='#EFBF04';this.style.transform='translateY(-2px)';" onmouseout="this.style.borderColor='var(--cream-border)';this.style.transform='translateY(0)';">
+            <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#C49D00,#EFBF04);border-radius:13px 13px 0 0;"></div>
+            <div style="width:36px;height:36px;background:#FEF9E0;border-radius:9px;display:flex;align-items:center;justify-content:center;margin-bottom:9px;">
+              <svg style="width:17px;height:17px;color:#C49D00;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            </div>
+            <div style="font-family:'Playfair Display',serif;font-size:28px;font-weight:700;color:#003328;line-height:1;margin-bottom:3px;">3</div>
+            <div style="font-size:11px;color:var(--gray600);font-weight:500;margin-bottom:7px;">Today&#39;s Appts</div>
+            <div style="display:flex;gap:3px;">
+              <div style="flex:1;height:3px;background:#00674F;border-radius:2px;"></div>
+              <div style="flex:1;height:3px;background:#EFBF04;border-radius:2px;"></div>
+              <div style="flex:1;height:3px;background:#E5E7EB;border-radius:2px;"></div>
+            </div>
+          </div>
+
+          <div onclick="navigate('ncp',document.querySelector('[onclick*=ncp]'))" style="background:#fff;border-radius:13px;padding:15px;border:1px solid var(--cream-border);box-shadow:0 2px 8px rgba(0,103,79,.06);cursor:pointer;transition:all .18s;position:relative;overflow:hidden;" onmouseover="this.style.borderColor='#00674F';this.style.transform='translateY(-2px)';" onmouseout="this.style.borderColor='var(--cream-border)';this.style.transform='translateY(0)';">
+            <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#00674F,#EFBF04);border-radius:13px 13px 0 0;"></div>
+            <div style="width:36px;height:36px;background:#E6F2EF;border-radius:9px;display:flex;align-items:center;justify-content:center;margin-bottom:9px;">
+              <svg style="width:17px;height:17px;color:#00674F;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z"/></svg>
+            </div>
+            <div style="font-family:'Playfair Display',serif;font-size:28px;font-weight:700;color:#003328;line-height:1;margin-bottom:3px;">18</div>
+            <div style="font-size:11px;color:var(--gray600);font-weight:500;margin-bottom:7px;">NCP Records</div>
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <div style="height:3px;flex:1;background:#E6F2EF;border-radius:2px;margin-right:6px;"><div style="width:89%;height:100%;background:linear-gradient(90deg,#00674F,#EFBF04);border-radius:2px;"></div></div>
+              <span style="font-size:9.5px;font-weight:600;color:#C49D00;white-space:nowrap;">2 pending</span>
+            </div>
+          </div>
+
+          <div onclick="navigate('progress',document.querySelector('[onclick*=progress]'))" style="background:#fff;border-radius:13px;padding:15px;border:1px solid var(--cream-border);box-shadow:0 2px 8px rgba(196,157,0,.06);cursor:pointer;transition:all .18s;position:relative;overflow:hidden;" onmouseover="this.style.borderColor='#EFBF04';this.style.transform='translateY(-2px)';" onmouseout="this.style.borderColor='var(--cream-border)';this.style.transform='translateY(0)';">
+            <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#EFBF04,#00896A);border-radius:13px 13px 0 0;"></div>
+            <div style="width:36px;height:36px;background:#FEF9E0;border-radius:9px;display:flex;align-items:center;justify-content:center;margin-bottom:9px;">
+              <svg style="width:17px;height:17px;color:#C49D00;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            </div>
+            <div style="font-family:'Playfair Display',serif;font-size:28px;font-weight:700;color:#003328;line-height:1;margin-bottom:3px;">87%</div>
+            <div style="font-size:11px;color:var(--gray600);font-weight:500;margin-bottom:7px;">Meal Adherence</div>
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <svg width="44" height="18" viewBox="0 0 44 18"><path d="M2 16 A18 18 0 0 1 42 16" fill="none" stroke="#E5E7EB" stroke-width="3.5" stroke-linecap="round"/><path d="M2 16 A18 18 0 0 1 42 16" fill="none" stroke="url(#ga)" stroke-width="3.5" stroke-linecap="round" stroke-dasharray="62.8" stroke-dashoffset="8.2"/><defs><linearGradient id="ga" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#EFBF04"/><stop offset="100%" stop-color="#00896A"/></linearGradient></defs></svg>
+              <span style="font-size:9.5px;font-weight:600;color:#00674F;">&#x2191; 4%</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- My Patients (Courses-style) -->
+        <div style="background:#fff;border-radius:16px;border:1px solid var(--cream-border);overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,.04);">
+          <div style="padding:13px 18px;border-bottom:1px solid var(--cream-border);display:flex;align-items:center;justify-content:space-between;">
+            <div style="font-family:'Playfair Display',serif;font-size:15px;font-weight:600;color:#003328;">My Patients</div>
+            <div style="display:flex;align-items:center;gap:6px;">
+              <button style="padding:4px 14px;background:#00674F;color:#FDFBD4;border:none;border-radius:20px;font-size:11.5px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;display:inline-flex;align-items:center;gap:5px;">Active <span style="background:#EFBF04;color:#003328;border-radius:10px;padding:0px 6px;font-size:10.5px;font-weight:700;">24</span></button>
+              <button onclick="showToast('Discharged patients list','📋')" style="padding:4px 14px;background:transparent;color:var(--gray600);border:none;border-radius:20px;font-size:11.5px;cursor:pointer;font-family:'DM Sans',sans-serif;">Discharged <span style="background:#E5E7EB;color:var(--gray600);border-radius:10px;padding:0px 6px;font-size:10.5px;font-weight:700;">8</span></button>
+              <svg style="width:15px;height:15px;color:var(--gray400);cursor:pointer;margin-left:4px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
+            </div>
+          </div>
+          <div style="padding:14px 16px;display:grid;grid-template-columns:repeat(4,1fr);gap:10px;">
+            <div onclick="navigate('ncp',document.querySelector('[onclick*=ncp]'));showToast('NCP: M. Santos','📋')" style="border:1px solid var(--cream-border);border-radius:11px;overflow:hidden;cursor:pointer;transition:all .18s;background:#fff;" onmouseover="this.style.borderColor='#00674F';this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 12px rgba(0,103,79,.12)';" onmouseout="this.style.borderColor='var(--cream-border)';this.style.transform='translateY(0)';this.style.boxShadow='none';">
+              <div style="height:4px;background:linear-gradient(90deg,#00674F,#00896A);"></div>
+              <div style="padding:11px 12px;">
+                <div style="width:34px;height:34px;background:#00674F;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#FDFBD4;margin-bottom:7px;">ML</div>
+                <div style="font-size:12px;font-weight:600;color:#003328;margin-bottom:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">M. Santos</div>
+                <div style="font-size:10px;color:var(--gray600);margin-bottom:7px;">T2DM · Phase 3</div>
+                <div style="height:3px;background:#E6F2EF;border-radius:2px;"><div style="width:75%;height:100%;background:#00674F;border-radius:2px;"></div></div>
+                <div style="font-size:9.5px;color:var(--gray400);margin-top:3px;">NCP 75%</div>
+              </div>
+            </div>
+            <div onclick="navigate('ncp',document.querySelector('[onclick*=ncp]'));showToast('NCP: J. Cruz','📋')" style="border:1px solid var(--cream-border);border-radius:11px;overflow:hidden;cursor:pointer;transition:all .18s;background:#fff;" onmouseover="this.style.borderColor='#EFBF04';this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 12px rgba(196,157,0,.12)';" onmouseout="this.style.borderColor='var(--cream-border)';this.style.transform='translateY(0)';this.style.boxShadow='none';">
+              <div style="height:4px;background:linear-gradient(90deg,#C49D00,#EFBF04);"></div>
+              <div style="padding:11px 12px;">
+                <div style="width:34px;height:34px;background:#EFBF04;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#003328;margin-bottom:7px;">JR</div>
+                <div style="font-size:12px;font-weight:600;color:#003328;margin-bottom:1px;">J. Cruz</div>
+                <div style="font-size:10px;color:var(--gray600);margin-bottom:7px;">Hypertension · Phase 4</div>
+                <div style="height:3px;background:#FEF9E0;border-radius:2px;"><div style="width:90%;height:100%;background:#EFBF04;border-radius:2px;"></div></div>
+                <div style="font-size:9.5px;color:var(--gray400);margin-top:3px;">NCP 90%</div>
+              </div>
+            </div>
+            <div onclick="navigate('ncp',document.querySelector('[onclick*=ncp]'));showToast('NCP: A. Reyes','📋')" style="border:1px solid var(--cream-border);border-radius:11px;overflow:hidden;cursor:pointer;transition:all .18s;background:#fff;" onmouseover="this.style.borderColor='#00674F';this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 12px rgba(0,103,79,.12)';" onmouseout="this.style.borderColor='var(--cream-border)';this.style.transform='translateY(0)';this.style.boxShadow='none';">
+              <div style="height:4px;background:linear-gradient(90deg,#00674F,#EFBF04);"></div>
+              <div style="padding:11px 12px;">
+                <div style="width:34px;height:34px;background:#E6F2EF;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#00674F;margin-bottom:7px;">AL</div>
+                <div style="font-size:12px;font-weight:600;color:#003328;margin-bottom:1px;">A. Reyes</div>
+                <div style="font-size:10px;color:var(--gray600);margin-bottom:7px;">Obesity · Phase 2</div>
+                <div style="height:3px;background:#E6F2EF;border-radius:2px;"><div style="width:40%;height:100%;background:#00674F;border-radius:2px;"></div></div>
+                <div style="font-size:9.5px;color:var(--gray400);margin-top:3px;">NCP 40%</div>
+              </div>
+            </div>
+            <div onclick="navigate('patients',document.querySelector('[onclick*=patients]'))" style="border:2px dashed var(--cream-border);border-radius:11px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:14px 10px;transition:all .18s;min-height:110px;" onmouseover="this.style.borderColor='#00674F';this.style.background='#E6F2EF';" onmouseout="this.style.borderColor='var(--cream-border)';this.style.background='transparent';">
+              <div style="width:30px;height:30px;background:#E6F2EF;border-radius:50%;display:flex;align-items:center;justify-content:center;margin-bottom:6px;font-size:17px;color:#00674F;font-weight:300;">+</div>
+              <div style="font-size:11px;font-weight:500;color:#00674F;text-align:center;">View All Patients</div>
+            </div>
+          </div>
+          <!-- Scroll arrows like STI courses -->
+          <div style="padding:8px 16px;border-top:1px solid var(--cream-border);display:flex;justify-content:flex-end;gap:6px;">
+            <button onclick="showToast('Previous patients','◀')" style="width:28px;height:28px;background:#E6F2EF;border:none;border-radius:7px;cursor:pointer;color:#00674F;font-size:12px;">&#9664;</button>
+            <button onclick="navigate('patients',document.querySelector('[onclick*=patients]'))" style="width:28px;height:28px;background:#00674F;border:none;border-radius:7px;cursor:pointer;color:#FDFBD4;font-size:12px;">&#9654;</button>
+          </div>
+        </div>
+
+      </div>
+      <!-- END LEFT COLUMN -->
+
+      <!-- ── RIGHT SIDEBAR ── -->
+      <div style="display:flex;flex-direction:column;gap:14px;position:sticky;top:80px;">
+
+        <!-- Mini Calendar -->
+        <div style="background:#fff;border-radius:14px;border:1px solid var(--cream-border);box-shadow:0 2px 8px rgba(0,0,0,.04);overflow:hidden;">
+          <div style="padding:11px 15px;border-bottom:1px solid var(--cream-border);display:flex;align-items:center;justify-content:space-between;">
+            <div style="display:flex;align-items:center;gap:6px;">
+              <svg style="width:13px;height:13px;color:#00674F;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              <span style="font-size:13px;font-weight:700;color:#003328;">Calendar</span>
+            </div>
+          </div>
+          <div style="padding:11px 13px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:9px;">
+              <button onclick="showToast('Prev month','◀')" style="width:20px;height:20px;background:#E6F2EF;border:none;border-radius:5px;cursor:pointer;color:#00674F;font-size:10px;display:flex;align-items:center;justify-content:center;">&#9664;</button>
+              <span style="font-size:12.5px;font-weight:700;color:#003328;">April 2026</span>
+              <button onclick="showToast('Next month','▶')" style="width:20px;height:20px;background:#E6F2EF;border:none;border-radius:5px;cursor:pointer;color:#00674F;font-size:10px;display:flex;align-items:center;justify-content:center;">&#9654;</button>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:1px;margin-bottom:3px;">
+              <div style="text-align:center;font-size:9px;font-weight:600;color:var(--gray400);padding:1px 0;">S</div>
+              <div style="text-align:center;font-size:9px;font-weight:600;color:var(--gray400);padding:1px 0;">M</div>
+              <div style="text-align:center;font-size:9px;font-weight:600;color:var(--gray400);padding:1px 0;">T</div>
+              <div style="text-align:center;font-size:9px;font-weight:600;color:var(--gray400);padding:1px 0;">W</div>
+              <div style="text-align:center;font-size:9px;font-weight:600;color:var(--gray400);padding:1px 0;">T</div>
+              <div style="text-align:center;font-size:9px;font-weight:600;color:var(--gray400);padding:1px 0;">F</div>
+              <div style="text-align:center;font-size:9px;font-weight:600;color:var(--gray400);padding:1px 0;">S</div>
+            </div>
+            <div id="mini-cal-grid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:1px;"></div>
+            <div style="display:flex;justify-content:space-between;margin-top:9px;padding-top:8px;border-top:1px solid var(--cream-border);">
+              <button onclick="navigate('appointments',document.querySelector('[onclick*=appointments]'))" style="font-size:10.5px;color:#00674F;font-weight:600;background:none;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;">full calendar</button>
+              <button onclick="showToast('Calendar hidden','👁️')" style="font-size:10.5px;color:var(--gray400);background:none;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;">hide</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- To-Do -->
+        <div style="background:#fff;border-radius:14px;border:1px solid var(--cream-border);box-shadow:0 2px 8px rgba(0,0,0,.04);overflow:hidden;">
+          <div style="padding:11px 15px;border-bottom:1px solid var(--cream-border);display:flex;align-items:center;justify-content:space-between;">
+            <div style="display:flex;align-items:center;gap:6px;">
+              <svg style="width:13px;height:13px;color:#C49D00;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+              <span style="font-size:13px;font-weight:700;color:#003328;">To-do</span>
+            </div>
+            <button onclick="showToast('Task added!','✅')" style="width:20px;height:20px;background:#E6F2EF;border:none;border-radius:5px;cursor:pointer;color:#00674F;font-size:15px;display:flex;align-items:center;justify-content:center;line-height:1;">+</button>
+          </div>
+          <div style="padding:9px 13px;display:flex;flex-direction:column;gap:0;">
+            <div style="display:flex;align-items:flex-start;gap:7px;padding:7px 0;border-bottom:1px solid #F9FAFB;">
+              <div style="width:13px;height:13px;border-radius:3px;border:1.5px solid #EFBF04;background:#FEF9E0;flex-shrink:0;margin-top:1px;"></div>
+              <div style="flex:1;min-width:0;"><div style="font-size:11.5px;color:#003328;font-weight:500;line-height:1.3;">Complete NCP for M. Santos</div><div style="font-size:10px;color:var(--gray400);">Due today</div></div>
+              <span style="width:6px;height:6px;background:#EFBF04;border-radius:50%;flex-shrink:0;margin-top:4px;"></span>
+            </div>
+            <div style="display:flex;align-items:flex-start;gap:7px;padding:7px 0;border-bottom:1px solid #F9FAFB;">
+              <div style="width:13px;height:13px;border-radius:3px;border:1.5px solid #00674F;background:#E6F2EF;flex-shrink:0;margin-top:1px;"></div>
+              <div style="flex:1;min-width:0;"><div style="font-size:11.5px;color:#003328;font-weight:500;line-height:1.3;">Review RA 10173 re-consents</div><div style="font-size:10px;color:var(--gray400);">Due Apr 30</div></div>
+              <span style="width:6px;height:6px;background:#00674F;border-radius:50%;flex-shrink:0;margin-top:4px;"></span>
+            </div>
+            <div style="display:flex;align-items:flex-start;gap:7px;padding:7px 0;border-bottom:1px solid #F9FAFB;">
+              <div style="width:13px;height:13px;border-radius:3px;border:1.5px solid #D1D5DB;background:#F3F4F6;flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center;"><svg style="width:9px;height:9px;color:#9CA3AF;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+              <div style="flex:1;"><div style="font-size:11.5px;color:var(--gray400);text-decoration:line-through;">Upload meal plan PDF</div></div>
+            </div>
+            <div style="display:flex;align-items:flex-start;gap:7px;padding:7px 0;">
+              <div style="width:13px;height:13px;border-radius:3px;border:1.5px solid #EFBF04;background:#FEF9E0;flex-shrink:0;margin-top:1px;"></div>
+              <div style="flex:1;min-width:0;"><div style="font-size:11.5px;color:#003328;font-weight:500;line-height:1.3;">Generate April progress reports</div><div style="font-size:10px;color:var(--gray400);">Due May 1</div></div>
+              <span style="width:6px;height:6px;background:#EFBF04;border-radius:50%;flex-shrink:0;margin-top:4px;"></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Announcements -->
+        <div style="background:#fff;border-radius:14px;border:1px solid var(--cream-border);box-shadow:0 2px 8px rgba(0,0,0,.04);overflow:hidden;">
+          <div style="padding:11px 15px;border-bottom:1px solid var(--cream-border);display:flex;align-items:center;justify-content:space-between;">
+            <div style="display:flex;align-items:center;gap:6px;">
+              <svg style="width:13px;height:13px;color:#00674F;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+              <span style="font-size:13px;font-weight:700;color:#003328;">Announcements</span>
+            </div>
+            <span style="background:#EFBF04;color:#003328;font-size:9.5px;font-weight:700;padding:1px 7px;border-radius:10px;">5</span>
+          </div>
+          <div style="padding:7px 13px;display:flex;flex-direction:column;">
+            <div onclick="showToast('RA 10173 Re-consent Deadline','📢')" style="display:flex;align-items:flex-start;gap:7px;padding:7px 0;border-bottom:1px solid #F9FAFB;cursor:pointer;">
+              <svg style="width:11px;height:11px;color:#00674F;flex-shrink:0;margin-top:2px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+              <div><div style="font-size:11.5px;color:#00674F;font-weight:500;line-height:1.4;">RA 10173 Re-consent Deadline</div><div style="font-size:10px;color:var(--gray400);">Apr 25 · Admin</div></div>
+            </div>
+            <div onclick="showToast('System Maintenance May 3','🔧')" style="display:flex;align-items:flex-start;gap:7px;padding:7px 0;border-bottom:1px solid #F9FAFB;cursor:pointer;">
+              <svg style="width:11px;height:11px;color:#C49D00;flex-shrink:0;margin-top:2px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+              <div><div style="font-size:11.5px;color:#C49D00;font-weight:500;line-height:1.4;">System Maintenance — May 3</div><div style="font-size:10px;color:var(--gray400);">Apr 24 · System</div></div>
+            </div>
+            <div onclick="showToast('New FNRI Guidelines','📊')" style="display:flex;align-items:flex-start;gap:7px;padding:7px 0;border-bottom:1px solid #F9FAFB;cursor:pointer;">
+              <svg style="width:11px;height:11px;color:#00674F;flex-shrink:0;margin-top:2px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+              <div><div style="font-size:11.5px;color:#00674F;font-weight:500;line-height:1.4;">New FNRI Dietary Guidelines</div><div style="font-size:10px;color:var(--gray400);">Apr 22 · FNRI</div></div>
+            </div>
+            <div onclick="showToast('DOH Telehealth Advisory','🏥')" style="display:flex;align-items:flex-start;gap:7px;padding:7px 0;border-bottom:1px solid #F9FAFB;cursor:pointer;">
+              <svg style="width:11px;height:11px;color:#C49D00;flex-shrink:0;margin-top:2px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+              <div><div style="font-size:11.5px;color:#C49D00;font-weight:500;line-height:1.4;">DOH Telehealth Advisory 2026-02</div><div style="font-size:10px;color:var(--gray400);">Apr 18 · DOH</div></div>
+            </div>
+            <div onclick="showToast('PRC License Renewal','🪪')" style="display:flex;align-items:flex-start;gap:7px;padding:7px 0;cursor:pointer;">
+              <svg style="width:11px;height:11px;color:#00674F;flex-shrink:0;margin-top:2px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+              <div><div style="font-size:11.5px;color:#00674F;font-weight:500;line-height:1.4;">PRC License Renewal — Dec 2026</div><div style="font-size:10px;color:var(--gray400);">Apr 15 · PRC</div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Today Summary -->
+        <div style="background:#fff;border-radius:14px;border:1px solid var(--cream-border);box-shadow:0 2px 8px rgba(0,0,0,.04);overflow:hidden;">
+          <div style="padding:11px 15px;border-bottom:1px solid var(--cream-border);display:flex;align-items:center;gap:6px;">
+            <svg style="width:13px;height:13px;color:#EFBF04;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            <span style="font-size:13px;font-weight:700;color:#003328;">Today</span>
+          </div>
+          <div style="padding:9px 13px;display:flex;flex-direction:column;gap:0;">
+            <div style="display:flex;align-items:center;gap:7px;padding:6px 0;border-bottom:1px solid #F9FAFB;">
+              <svg style="width:11px;height:11px;color:#00674F;flex-shrink:0;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586l5.414 5.414V19a2 2 0 0 1-2 2z"/></svg>
+              <span style="font-size:11px;color:#003328;">NCP — M. Santos <span style="color:var(--gray400);">(due 12:00 PM)</span></span>
+            </div>
+            <div style="display:flex;align-items:center;gap:7px;padding:6px 0;border-bottom:1px solid #F9FAFB;">
+              <svg style="width:11px;height:11px;color:#C49D00;flex-shrink:0;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              <span style="font-size:11px;color:#003328;">J. Cruz follow-up <span style="color:var(--gray400);">(due 11:59 PM)</span></span>
+            </div>
+            <div style="display:flex;align-items:center;gap:7px;padding:6px 0;">
+              <svg style="width:11px;height:11px;color:#00674F;flex-shrink:0;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+              <span style="font-size:11px;color:#003328;">Progress Export <span style="color:var(--gray400);">(due May 1)</span></span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+      <!-- END RIGHT SIDEBAR -->
+
+    </div>
+    <!-- END dash-main -->
+
+    <!-- ══ TAB: MY SCHEDULE ══ -->
+    <div id="dash-sched" style="display:none;">
+      <div style="background:#fff;border-radius:16px;border:1px solid var(--cream-border);overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,.04);">
+        <div style="padding:15px 20px;border-bottom:1px solid var(--cream-border);display:flex;justify-content:space-between;align-items:center;">
+          <div style="font-family:'Playfair Display',serif;font-size:16px;font-weight:600;color:#003328;">My Schedule — April 2026</div>
+          <button onclick="openModal('appt-modal')" class="btn btn-primary btn-sm">+ New Appointment</button>
+        </div>
+        <div style="padding:18px;">
+          <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin-bottom:8px;">
+            <div style="text-align:center;font-size:10.5px;font-weight:600;color:var(--gray600);text-transform:uppercase;letter-spacing:.6px;padding:5px 0;">Sun</div>
+            <div style="text-align:center;font-size:10.5px;font-weight:600;color:var(--gray600);text-transform:uppercase;letter-spacing:.6px;padding:5px 0;">Mon</div>
+            <div style="text-align:center;font-size:10.5px;font-weight:600;color:var(--gray600);text-transform:uppercase;letter-spacing:.6px;padding:5px 0;">Tue</div>
+            <div style="text-align:center;font-size:10.5px;font-weight:600;color:var(--gray600);text-transform:uppercase;letter-spacing:.6px;padding:5px 0;">Wed</div>
+            <div style="text-align:center;font-size:10.5px;font-weight:600;color:var(--gray600);text-transform:uppercase;letter-spacing:.6px;padding:5px 0;">Thu</div>
+            <div style="text-align:center;font-size:10.5px;font-weight:600;color:var(--gray600);text-transform:uppercase;letter-spacing:.6px;padding:5px 0;">Fri</div>
+            <div style="text-align:center;font-size:10.5px;font-weight:600;color:var(--gray600);text-transform:uppercase;letter-spacing:.6px;padding:5px 0;">Sat</div>
+          </div>
+          <div id="dash-cal-days" style="display:grid;grid-template-columns:repeat(7,1fr);gap:5px;"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ TAB: ANNOUNCEMENTS ══ -->
+    <div id="dash-ann" style="display:none;">
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <div onclick="showToast('Opening announcement…','📢')" style="background:#fff;border-radius:13px;border:1.5px solid #b3d9cf;padding:16px 20px;display:flex;gap:13px;align-items:flex-start;cursor:pointer;transition:all .18s;" onmouseover="this.style.borderColor='#00674F';" onmouseout="this.style.borderColor='#b3d9cf';">
+          <div style="width:38px;height:38px;background:#E6F2EF;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:17px;">📋</div>
+          <div><div style="font-size:13.5px;font-weight:600;color:#003328;margin-bottom:3px;">RA 10173 Patient Re-consent Deadline — May 1, 2026</div><div style="font-size:12px;color:var(--gray600);line-height:1.6;">2 patients are due for annual re-consent under the Data Privacy Act.</div><div style="font-size:10.5px;color:var(--gray400);margin-top:5px;">April 25, 2026 · Admin</div></div>
+        </div>
+        <div onclick="showToast('Opening maintenance notice…','🔧')" style="background:#fff;border-radius:13px;border:1.5px solid #f0d875;padding:16px 20px;display:flex;gap:13px;align-items:flex-start;cursor:pointer;transition:all .18s;" onmouseover="this.style.borderColor='#EFBF04';" onmouseout="this.style.borderColor='#f0d875';">
+          <div style="width:38px;height:38px;background:#FEF9E0;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:17px;">🔧</div>
+          <div><div style="font-size:13.5px;font-weight:600;color:#003328;margin-bottom:3px;">NutriMatch System Maintenance — May 3, 2026</div><div style="font-size:12px;color:var(--gray600);line-height:1.6;">Scheduled downtime 12:00 AM–4:00 AM. Save all work before midnight.</div><div style="font-size:10.5px;color:var(--gray400);margin-top:5px;">April 24, 2026 · System</div></div>
+        </div>
+        <div onclick="showToast('Opening FNRI update…','📊')" style="background:#fff;border-radius:13px;border:1.5px solid #b3d9cf;padding:16px 20px;display:flex;gap:13px;align-items:flex-start;cursor:pointer;transition:all .18s;" onmouseover="this.style.borderColor='#00674F';" onmouseout="this.style.borderColor='#b3d9cf';">
+          <div style="width:38px;height:38px;background:#E6F2EF;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:17px;">📊</div>
+          <div><div style="font-size:13.5px;font-weight:600;color:#003328;margin-bottom:3px;">New FNRI Dietary Reference Intakes Released</div><div style="font-size:12px;color:var(--gray600);line-height:1.6;">Updated Dietary Reference Values for Filipinos. NCP templates updated accordingly.</div><div style="font-size:10.5px;color:var(--gray400);margin-top:5px;">April 22, 2026 · FNRI</div></div>
+        </div>
+        <div onclick="showToast('Opening DOH advisory…','🏥')" style="background:#fff;border-radius:13px;border:1.5px solid #f0d875;padding:16px 20px;display:flex;gap:13px;align-items:flex-start;cursor:pointer;transition:all .18s;" onmouseover="this.style.borderColor='#EFBF04';" onmouseout="this.style.borderColor='#f0d875';">
+          <div style="width:38px;height:38px;background:#FEF9E0;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:17px;">🏥</div>
+          <div><div style="font-size:13.5px;font-weight:600;color:#003328;margin-bottom:3px;">DOH Telehealth Advisory — Circular 2026-02</div><div style="font-size:12px;color:var(--gray600);line-height:1.6;">Updated guidelines for RND teleconsultation. Comply by June 1, 2026.</div><div style="font-size:10.5px;color:var(--gray400);margin-top:5px;">April 18, 2026 · DOH</div></div>
+        </div>
+        <div onclick="showToast('Opening PRC reminder…','🪪')" style="background:#fff;border-radius:13px;border:1.5px solid #b3d9cf;padding:16px 20px;display:flex;gap:13px;align-items:flex-start;cursor:pointer;transition:all .18s;" onmouseover="this.style.borderColor='#00674F';" onmouseout="this.style.borderColor='#b3d9cf';">
+          <div style="width:38px;height:38px;background:#E6F2EF;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:17px;">🪪</div>
+          <div><div style="font-size:13.5px;font-weight:600;color:#003328;margin-bottom:3px;">PRC License Renewal Reminder — December 2026</div><div style="font-size:12px;color:var(--gray600);line-height:1.6;">Minimum 45 CPD units required. Begin completion before November 2026.</div><div style="font-size:10.5px;color:var(--gray400);margin-top:5px;">April 15, 2026 · PRC</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ TAB: REPORTS ══ -->
+    <div id="dash-rep" style="display:none;">
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:18px;">
+        <div style="background:#fff;border-radius:14px;border:1px solid var(--cream-border);padding:18px;box-shadow:0 2px 8px rgba(0,0,0,.04);">
+          <div style="font-size:10.5px;font-weight:600;color:var(--gray400);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px;">Monthly Revenue</div>
+          <div style="font-family:'Playfair Display',serif;font-size:26px;font-weight:700;color:#00674F;margin-bottom:4px;">&#x20B1;48,500</div>
+          <div style="font-size:11.5px;color:var(--gray600);">April 2026 · &#x2191; 18% vs March</div>
+          <div style="margin-top:10px;height:4px;background:#E6F2EF;border-radius:2px;"><div style="width:72%;height:100%;background:#00674F;border-radius:2px;"></div></div>
+        </div>
+        <div style="background:#fff;border-radius:14px;border:1px solid var(--cream-border);padding:18px;box-shadow:0 2px 8px rgba(0,0,0,.04);">
+          <div style="font-size:10.5px;font-weight:600;color:var(--gray400);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px;">Patient Outcomes</div>
+          <div style="font-family:'Playfair Display',serif;font-size:26px;font-weight:700;color:#C49D00;margin-bottom:4px;">79%</div>
+          <div style="font-size:11.5px;color:var(--gray600);">Nutrition goals met · &#x2191; 6% this month</div>
+          <div style="margin-top:10px;height:4px;background:#FEF9E0;border-radius:2px;"><div style="width:79%;height:100%;background:#EFBF04;border-radius:2px;"></div></div>
+        </div>
+        <div style="background:#fff;border-radius:14px;border:1px solid var(--cream-border);padding:18px;box-shadow:0 2px 8px rgba(0,0,0,.04);">
+          <div style="font-size:10.5px;font-weight:600;color:var(--gray400);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px;">Meal Adherence</div>
+          <div style="font-family:'Playfair Display',serif;font-size:26px;font-weight:700;color:#00674F;margin-bottom:4px;">87%</div>
+          <div style="font-size:11.5px;color:var(--gray600);">Plan compliance · &#x2191; 4% MoM</div>
+          <div style="margin-top:10px;height:4px;background:#E6F2EF;border-radius:2px;"><div style="width:87%;height:100%;background:linear-gradient(90deg,#00674F,#EFBF04);border-radius:2px;"></div></div>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;justify-content:flex-end;">
+        <button onclick="navigate('progress',document.querySelector('[onclick*=progress]'))" class="btn btn-primary">View Full Reports</button>
+        <button onclick="showToast('Exporting PDF…','📄')" class="btn btn-outline">Export PDF</button>
+      </div>
+    </div>
+
+  </div>
+  <!-- ══ PAGE: MY PATIENTS ══ -->
+  <div class="page" id="page-patients">
+    <div class="filter-bar">
+      <div class="search-box">
+        <svg style="width:14px;height:14px;color:var(--gray400)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" placeholder="Search by name or patient ID..."/>
+      </div>
+      <select class="filter-select"><option>All Conditions</option><option>T2DM</option><option>Hypertension</option><option>CKD</option><option>Weight Management</option></select>
+      <select class="filter-select"><option>All Status</option><option>Active</option><option>Inactive</option><option>Discharged</option></select>
+      <button class="btn btn-primary btn-sm">+ Add Patient</button>
+    </div>
+    <div class="card" style="padding:0;overflow:hidden">
+      <table class="patient-table" style="width:100%">
+        <thead>
+          <tr><th>Patient</th><th>Age / Sex</th><th>Condition</th><th>Last Visit</th><th>NCP Status</th><th>Adherence</th><th>Actions</th></tr>
+        </thead>
+        <tbody id="patient-tbody">
+        </tbody>
+      </table>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-top:14px">
+      <div style="font-size:13px;color:var(--gray600)">Showing 1–10 of 24 patients</div>
+      <div style="display:flex;gap:6px">
+        <button class="btn btn-sm btn-outline">← Prev</button>
+        <button class="btn btn-sm btn-primary">Next →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ PAGE: APPOINTMENTS ══ -->
+  <div class="page" id="page-appointments">
+    <div class="grid-2" style="gap:20px">
+      <!-- Calendar -->
+      <div class="card">
+        <div class="section-header">
+          <div class="section-title">April 2026</div>
+          <div style="display:flex;gap:6px">
+            <button class="btn btn-sm btn-outline">‹</button>
+            <button class="btn btn-sm btn-outline">›</button>
+          </div>
+        </div>
+        <div class="cal-grid" style="margin-bottom:10px">
+          <div class="cal-header">Sun</div><div class="cal-header">Mon</div><div class="cal-header">Tue</div><div class="cal-header">Wed</div><div class="cal-header">Thu</div><div class="cal-header">Fri</div><div class="cal-header">Sat</div>
+        </div>
+        <div class="cal-grid" id="cal-days"></div>
+        <div class="divider"></div>
+        <div style="display:flex;gap:12px;font-size:11.5px;color:var(--gray600)">
+          <div style="display:flex;align-items:center;gap:5px"><div style="width:8px;height:8px;background:var(--green);border-radius:50%"></div>Has appointment</div>
+          <div style="display:flex;align-items:center;gap:5px"><div style="width:8px;height:8px;background:var(--gold);border-radius:3px;border:1px solid var(--gold-dark)"></div>Today</div>
+        </div>
+      </div>
+      <!-- Appointment List -->
+      <div>
+        <div class="section-header">
+          <div class="section-title">April 27 — Today</div>
+          <button class="btn btn-primary btn-sm">+ Schedule</button>
+        </div>
+        <div class="appt-list-item">
+          <div class="appt-stripe" style="background:var(--green)"></div>
+          <div class="appt-time-block"><div class="appt-hr">9:00</div><div class="appt-ampm">AM</div></div>
+          <div class="appt-details">
+            <div class="appt-patient">Maria Lourdes Santos</div>
+            <div class="appt-meta">Initial Assessment · 60 min · Room 3</div>
+            <div style="margin-top:6px"><span class="tag tag-green">MNT — Type 2 Diabetes</span></div>
+          </div>
+          <span class="tag tag-green">Confirmed</span>
+        </div>
+        <div class="appt-list-item">
+          <div class="appt-stripe" style="background:var(--gold)"></div>
+          <div class="appt-time-block"><div class="appt-hr">10:30</div><div class="appt-ampm">AM</div></div>
+          <div class="appt-details">
+            <div class="appt-patient">Jose Ramon Cruz</div>
+            <div class="appt-meta">Follow-up · 45 min · Telehealth</div>
+            <div style="margin-top:6px"><span class="tag tag-gold">Hypertension Diet</span></div>
+          </div>
+          <span class="tag tag-gold">In Progress</span>
+        </div>
+        <div class="appt-list-item">
+          <div class="appt-stripe" style="background:var(--green-dark)"></div>
+          <div class="appt-time-block"><div class="appt-hr">2:00</div><div class="appt-ampm">PM</div></div>
+          <div class="appt-details">
+            <div class="appt-patient">Ana Luisa Reyes</div>
+            <div class="appt-meta">Follow-up · 30 min · Telehealth</div>
+            <div style="margin-top:6px"><span class="tag tag-blue">Weight Management</span></div>
+          </div>
+          <span class="tag tag-blue">Scheduled</span>
+        </div>
+        <div class="appt-list-item">
+          <div class="appt-stripe" style="background:var(--gray400)"></div>
+          <div class="appt-time-block"><div class="appt-hr">4:00</div><div class="appt-ampm">PM</div></div>
+          <div class="appt-details">
+            <div class="appt-patient">Roberto Bautista</div>
+            <div class="appt-meta">Initial Assessment · 60 min · Room 1</div>
+            <div style="margin-top:6px"><span class="tag tag-gray">CKD Nutrition Support</span></div>
+          </div>
+          <span class="tag tag-gray">Pending</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ PAGE: NCP RECORDS ══ -->
+  <div class="page" id="page-ncp">
+    <div class="filter-bar">
+      <div class="search-box" style="max-width:280px">
+        <svg style="width:14px;height:14px;color:var(--gray400)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" placeholder="Search NCP records..."/>
+      </div>
+      <select class="filter-select"><option>All Phases</option><option>Assessment</option><option>Diagnosis</option><option>Intervention</option><option>Monitoring</option></select>
+      <select class="filter-select"><option>All Patients</option><option>Maria Santos</option><option>Jose Cruz</option></select>
+      <button class="btn btn-primary btn-sm">+ New NCP Record</button>
+    </div>
+
+    <div style="margin-bottom:20px">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+        <div style="font-size:13px;font-weight:600;color:var(--green-dark)">Maria Lourdes Santos</div>
+        <span class="tag tag-green">Active Record</span>
+        <span class="tag tag-blue">T2DM · MNT</span>
+        <div style="margin-left:auto;font-size:12px;color:var(--gray600)">Record ID: NCP-2026-0042 · Updated Apr 25, 2026</div>
+      </div>
+
+      <div class="ncp-phase">
+        <div class="phase-num" style="background:var(--green-muted);color:var(--green)">1</div>
+        <div style="flex:1">
+          <div class="phase-title">Nutrition Assessment</div>
+          <div class="phase-desc">Anthropometric: Ht 157cm, Wt 72kg, BMI 29.2 (Overweight). Biochemical: FBS 9.2 mmol/L, HbA1c 8.1%, LDL 3.4 mmol/L. Dietary: 24-hr recall shows excess refined CHO intake (~65%), inadequate fiber (&lt;15g/day). Clinical: T2DM diagnosed 2022, on Metformin 500mg BID.</div>
+        </div>
+        <div class="phase-status"><span class="tag tag-green">✓ Complete</span></div>
+      </div>
+      <div class="ncp-phase">
+        <div class="phase-num" style="background:var(--gold-muted);color:var(--gold-dark)">2</div>
+        <div style="flex:1">
+          <div class="phase-title">Nutrition Diagnosis</div>
+          <div class="phase-desc">PES Statement: Excessive carbohydrate intake (P) related to inadequate knowledge of glycemic index foods and Filipino dietary patterns (E) as evidenced by FBS 9.2 mmol/L and 24-hr recall showing 65% CHO distribution above target 50-55% (S).</div>
+        </div>
+        <div class="phase-status"><span class="tag tag-green">✓ Complete</span></div>
+      </div>
+      <div class="ncp-phase" style="border-color:var(--green);border-width:1.5px">
+        <div class="phase-num" style="background:var(--green-muted);color:var(--green-dark)">3</div>
+        <div style="flex:1">
+          <div class="phase-title">Nutrition Intervention</div>
+          <div class="phase-desc">Goal: Reduce FBS to ≤7.0 mmol/L in 3 months. MNT Plan: 1,600 kcal/day, CHO 50%, Protein 20%, Fat 30%. FNRI Food Exchange Lists applied. Structured meal timing at 3-3-3 intervals. Dietary counseling bi-weekly.</div>
+        </div>
+        <div class="phase-status"><span class="tag" style="background:#FEF3C7;color:#92400E">In Progress</span></div>
+      </div>
+      <div class="ncp-phase" style="opacity:.6">
+        <div class="phase-num" style="background:var(--gray100);color:var(--gray600)">4</div>
+        <div style="flex:1">
+          <div class="phase-title">Nutrition Monitoring & Evaluation</div>
+          <div class="phase-desc">Scheduled: May 10, 2026 — Repeat FBS, HbA1c, dietary recall, weight monitoring, and patient-reported outcomes.</div>
+        </div>
+        <div class="phase-status"><span class="tag tag-gray">Pending</span></div>
+      </div>
+    </div>
+
+    <div class="section-header" style="margin-top:20px">
+      <div class="section-title">All NCP Records</div>
+    </div>
+    <div class="grid-3">
+      <div class="card card-sm" style="cursor:pointer;transition:all .18s" onmouseover="this.style.borderColor='var(--green)'" onmouseout="this.style.borderColor='var(--gray200)'">
+        <div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="font-size:13px;font-weight:600">Maria L. Santos</span><span class="tag tag-green">Phase 3</span></div>
+        <div style="font-size:12px;color:var(--gray600)">T2DM · MNT Protocol</div>
+        <div style="font-size:11px;color:var(--gray400);margin-top:6px">Updated Apr 25, 2026</div>
+        <div style="margin-top:10px;height:4px;background:var(--gray100);border-radius:2px"><div style="width:75%;height:100%;background:var(--green);border-radius:2px"></div></div>
+        <div style="font-size:10px;color:var(--gray600);margin-top:4px">75% complete</div>
+      </div>
+      <div class="card card-sm" style="cursor:pointer;transition:all .18s" onmouseover="this.style.borderColor='var(--green)'" onmouseout="this.style.borderColor='var(--gray200)'">
+        <div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="font-size:13px;font-weight:600">Jose R. Cruz</span><span class="tag tag-gold">Phase 4</span></div>
+        <div style="font-size:12px;color:var(--gray600)">Hypertension · DASH Diet</div>
+        <div style="font-size:11px;color:var(--gray400);margin-top:6px">Updated Apr 22, 2026</div>
+        <div style="margin-top:10px;height:4px;background:var(--gray100);border-radius:2px"><div style="width:90%;height:100%;background:var(--gold);border-radius:2px"></div></div>
+        <div style="font-size:10px;color:var(--gray600);margin-top:4px">90% complete</div>
+      </div>
+      <div class="card card-sm" style="cursor:pointer;transition:all .18s;opacity:.7" onmouseover="this.style.borderColor='var(--green)'" onmouseout="this.style.borderColor='var(--gray200)'">
+        <div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="font-size:13px;font-weight:600">Ana L. Reyes</span><span class="tag tag-blue">Phase 2</span></div>
+        <div style="font-size:12px;color:var(--gray600)">Obesity · Weight Reduction</div>
+        <div style="font-size:11px;color:var(--gray400);margin-top:6px">Updated Apr 20, 2026</div>
+        <div style="margin-top:10px;height:4px;background:var(--gray100);border-radius:2px"><div style="width:40%;height:100%;background:var(--green-dark);border-radius:2px"></div></div>
+        <div style="font-size:10px;color:var(--gray600);margin-top:4px">40% complete</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ PAGE: MEAL PLANNING ══ -->
+  <div class="page" id="page-meals">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+      <div>
+        <div style="font-size:13px;color:var(--gray600);margin-bottom:2px">Meal Plan for</div>
+        <select class="filter-select" style="font-size:14px;font-weight:500;border-color:var(--green)"><option>Maria Lourdes Santos</option><option>Jose Ramon Cruz</option><option>Ana Luisa Reyes</option></select>
+      </div>
+      <div style="display:flex;gap:10px;align-items:center">
+        <span class="tag tag-green">1,600 kcal/day target</span>
+        <span class="tag tag-blue">FNRI Exchange List v4</span>
+        <button class="btn btn-primary btn-sm">Generate Plan</button>
+        <button class="btn btn-outline btn-sm">Export PDF</button>
+      </div>
+    </div>
+
+    <!-- Macro Overview -->
+    <div class="card" style="margin-bottom:18px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><div class="section-title" style="font-size:15px">Daily Macronutrient Targets</div><span style="font-size:12px;color:var(--gray600)">Week 3 — April 21-27, 2026</span></div>
+      <div class="macro-bar" style="height:14px;margin-bottom:10px">
+        <div class="macro-seg" style="background:var(--green);flex:50"></div>
+        <div class="macro-seg" style="background:var(--gold);flex:20"></div>
+        <div class="macro-seg" style="background:var(--green-dark);flex:30"></div>
+      </div>
+      <div class="macro-legend">
+        <div class="legend-item"><div class="legend-dot" style="background:var(--green)"></div>Carbohydrates — 50% · 200g</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--gold)"></div>Protein — 20% · 80g</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--green-dark)"></div>Fat — 30% · 53g</div>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">
+      <div class="meal-day">
+        <div class="meal-day-header"><div class="meal-day-name">Monday</div><div class="meal-day-cal">1,598 kcal</div></div>
+        <div class="meal-slot"><div class="meal-time">Breakfast · 7AM</div><div class="meal-food">Sinangag (1 cup brown rice), Itlog na Maalat (1 pc), Kamatis</div><div class="meal-macros">CHO 45g · PRO 12g · Fat 8g · 298 kcal</div></div>
+        <div class="meal-slot"><div class="meal-time">AM Snack · 10AM</div><div class="meal-food">Banana (1 pc, medium), Low-fat milk (1 cup)</div><div class="meal-macros">CHO 32g · PRO 8g · Fat 2g · 178 kcal</div></div>
+        <div class="meal-slot"><div class="meal-time">Lunch · 12PM</div><div class="meal-food">Brown Rice (1 cup), Sinigang na Isda (1 serving), Pechay</div><div class="meal-macros">CHO 52g · PRO 22g · Fat 6g · 350 kcal</div></div>
+        <div class="meal-slot"><div class="meal-time">PM Snack · 3PM</div><div class="meal-food">Mango (½ pc), Unsalted Crackers (3 pcs)</div><div class="meal-macros">CHO 28g · PRO 3g · Fat 4g · 158 kcal</div></div>
+        <div class="meal-slot"><div class="meal-time">Dinner · 6PM</div><div class="meal-food">Brown Rice (¾ cup), Tinola (1 bowl), Malunggay</div><div class="meal-macros">CHO 48g · PRO 24g · Fat 5g · 333 kcal</div></div>
+      </div>
+      <div class="meal-day">
+        <div class="meal-day-header"><div class="meal-day-name">Tuesday</div><div class="meal-day-cal">1,605 kcal</div></div>
+        <div class="meal-slot"><div class="meal-time">Breakfast · 7AM</div><div class="meal-food">Lugaw (1 bowl), Soft-boiled egg (1 pc)</div><div class="meal-macros">CHO 42g · PRO 10g · Fat 5g · 249 kcal</div></div>
+        <div class="meal-slot"><div class="meal-time">AM Snack · 10AM</div><div class="meal-food">Papaya (1 cup diced), Peanuts (1 tbsp)</div><div class="meal-macros">CHO 18g · PRO 4g · Fat 4g · 124 kcal</div></div>
+        <div class="meal-slot"><div class="meal-time">Lunch · 12PM</div><div class="meal-food">Brown Rice (1 cup), Ginisang Monggo (1 cup), Kangkong</div><div class="meal-macros">CHO 55g · PRO 18g · Fat 4g · 328 kcal</div></div>
+        <div class="meal-slot"><div class="meal-time">PM Snack · 3PM</div><div class="meal-food">Camote (1 small, boiled), Skim Milk (1 cup)</div><div class="meal-macros">CHO 30g · PRO 8g · Fat 1g · 161 kcal</div></div>
+        <div class="meal-slot"><div class="meal-time">Dinner · 6PM</div><div class="meal-food">Brown Rice (¾ cup), Steamed Fish (1 pc), Pechay Guisado</div><div class="meal-macros">CHO 45g · PRO 26g · Fat 6g · 342 kcal</div></div>
+      </div>
+      <div class="meal-day" style="opacity:.75">
+        <div class="meal-day-header"><div class="meal-day-name">Wednesday</div><div class="meal-day-cal">1,590 kcal</div></div>
+        <div class="meal-slot"><div class="meal-time">Breakfast · 7AM</div><div class="meal-food">Pandesal (2 pcs, whole wheat), Kesong Puti (1 slice)</div><div class="meal-macros">CHO 38g · PRO 10g · Fat 6g · 246 kcal</div></div>
+        <div class="meal-slot"><div class="meal-time">AM Snack · 10AM</div><div class="meal-food">Dalandan (2 pcs), Boiled Egg White (2 pcs)</div><div class="meal-macros">CHO 20g · PRO 7g · Fat 0g · 108 kcal</div></div>
+        <div class="meal-slot"><div class="meal-time">Lunch · 12PM</div><div class="meal-food">Brown Rice (1 cup), Pinakbet (1 cup)</div><div class="meal-macros">CHO 50g · PRO 16g · Fat 8g · 332 kcal</div></div>
+        <div class="meal-slot"><div class="meal-time">PM Snack · 3PM</div><div class="meal-food">Corn on Cob (½), Low-fat yogurt (½ cup)</div><div class="meal-macros">CHO 26g · PRO 6g · Fat 2g · 146 kcal</div></div>
+        <div class="meal-slot"><div class="meal-time">Dinner · 6PM</div><div class="meal-food">Brown Rice (¾ cup), Chicken Tinola, Sitaw</div><div class="meal-macros">CHO 46g · PRO 25g · Fat 5g · 329 kcal</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ PAGE: PROGRESS REPORTS ══ -->
+  <div class="page" id="page-progress">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px">
+      <select class="filter-select" style="font-size:14px;font-weight:500;border-color:var(--green)"><option>Maria Lourdes Santos</option><option>Jose Ramon Cruz</option></select>
+      <select class="filter-select"><option>Last 3 Months</option><option>Last 6 Months</option><option>Last Year</option></select>
+      <div style="margin-left:auto;display:flex;gap:8px">
+        <button class="btn btn-outline btn-sm">Export PDF</button>
+        <button class="btn btn-primary btn-sm">Generate Report</button>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px">
+      <div class="metric-trend">
+        <div class="trend-icon" style="background:var(--green-muted)"><svg style="width:18px;height:18px;color:var(--green)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></div>
+        <div><div class="trend-label">Current Weight</div><div class="trend-val">72.4<span style="font-size:12px;font-weight:400"> kg</span></div><div class="trend-change stat-up">↓ 3.6 kg in 3 mos</div></div>
+      </div>
+      <div class="metric-trend">
+        <div class="trend-icon" style="background:#FEE2E2"><svg style="width:18px;height:18px;color:#DC2626" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+        <div><div class="trend-label">FBS</div><div class="trend-val">8.1<span style="font-size:12px;font-weight:400"> mmol/L</span></div><div class="trend-change stat-up">↓ from 9.2</div></div>
+      </div>
+      <div class="metric-trend">
+        <div class="trend-icon" style="background:var(--gold-muted)"><svg style="width:18px;height:18px;color:var(--gold-dark)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg></div>
+        <div><div class="trend-label">HbA1c</div><div class="trend-val">7.4<span style="font-size:12px;font-weight:400">%</span></div><div class="trend-change stat-up">↓ from 8.1%</div></div>
+      </div>
+      <div class="metric-trend">
+        <div class="trend-icon" style="background:var(--green-muted)"><svg style="width:18px;height:18px;color:var(--green-dark)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
+        <div><div class="trend-label">Meal Adherence</div><div class="trend-val">78<span style="font-size:12px;font-weight:400">%</span></div><div class="trend-change stat-up">↑ from 62%</div></div>
+      </div>
+    </div>
+
+    <div class="grid-2" style="gap:18px">
+      <div class="card">
+        <div class="section-title" style="margin-bottom:14px">Weight Trend (kg)</div>
+        <div class="chart-bars">
+          <div style="display:flex;flex-direction:column;align-items:center;gap:4px;flex:1"><div class="bar" style="background:var(--green-muted);height:60%;border:1.5px solid var(--green)"></div><div style="font-size:10px;color:var(--gray600)">Feb</div></div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:4px;flex:1"><div class="bar" style="background:var(--green-muted);height:55%;border:1.5px solid var(--green)"></div><div style="font-size:10px;color:var(--gray600)">Mar</div></div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:4px;flex:1"><div class="bar" style="background:var(--green);height:50%;border:none"></div><div style="font-size:10px;color:var(--gray600)">Apr</div></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--gray600);padding:0 8px;margin-top:6px"><span>76.0 kg</span><span>74.2 kg</span><span>72.4 kg</span></div>
+      </div>
+      <div class="card">
+        <div class="section-title" style="margin-bottom:14px">Blood Glucose Trend (mmol/L)</div>
+        <div class="chart-bars">
+          <div style="display:flex;flex-direction:column;align-items:center;gap:4px;flex:1"><div class="bar" style="background:#FEE2E2;height:80%;border:1.5px solid #DC2626"></div><div style="font-size:10px;color:var(--gray600)">Feb</div></div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:4px;flex:1"><div class="bar" style="background:#FEE2E2;height:70%;border:1.5px solid #DC2626"></div><div style="font-size:10px;color:var(--gray600)">Mar</div></div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:4px;flex:1"><div class="bar" style="background:#DC2626;height:62%;border:none"></div><div style="font-size:10px;color:var(--gray600)">Apr</div></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--gray600);padding:0 8px;margin-top:6px"><span>9.2</span><span>8.6</span><span>8.1</span></div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:18px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <div class="section-title">RND Clinical Notes</div>
+        <button class="btn btn-primary btn-sm">+ Add Note</button>
+      </div>
+      <div style="border-left:3px solid var(--green);padding:12px 16px;background:var(--green-muted);border-radius:0 8px 8px 0;margin-bottom:10px">
+        <div style="font-size:11px;color:var(--green-dark);font-weight:600;margin-bottom:4px">APRIL 22, 2026 — Kristine Perez, RND</div>
+        <div style="font-size:13px;color:var(--green-dark);line-height:1.6">Patient reports improved energy levels and reduced polyuria. Adherence to FNRI exchange list improved to 78%. FBS trending downward. Continue current intervention. Reinforce low-GI food choices at next session.</div>
+      </div>
+      <div style="border-left:3px solid var(--gold);padding:12px 16px;background:var(--gold-muted);border-radius:0 8px 8px 0">
+        <div style="font-size:11px;color:var(--gold-dark);font-weight:600;margin-bottom:4px">MARCH 30, 2026 — Kristine Perez, RND</div>
+        <div style="font-size:13px;color:var(--green-dark);line-height:1.6">Initial follow-up post-assessment. Patient struggling with meal timing at work. Adjusted to simplified 3-meal pattern. Provided printed FNRI food exchange guide. Scheduled bi-weekly check-in via telehealth.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ PAGE: RESOURCE LIBRARY ══ -->
+  <div class="page" id="page-library">
+
+    <!-- Upload Hero Banner -->
+    <div style="background:linear-gradient(130deg,#004D3A 0%,#00674F 60%,#00896A 100%);border-radius:18px;padding:22px 28px;margin-bottom:22px;display:flex;align-items:center;justify-content:space-between;position:relative;overflow:hidden">
+      <div style="position:absolute;right:-20px;top:-20px;width:160px;height:160px;border-radius:50%;background:rgba(239,191,4,.08)"></div>
+      <div style="position:absolute;right:100px;bottom:-50px;width:100px;height:100px;border-radius:50%;background:rgba(255,255,255,.05)"></div>
+      <div style="position:relative;z-index:1">
+        <div style="font-family:'Playfair Display',serif;font-size:18px;font-weight:600;color:#fff;margin-bottom:5px">📚 Educational Resource Center</div>
+        <div style="font-size:12.5px;color:rgba(255,254,249,.65);max-width:480px;line-height:1.6">Upload handouts, guides, meal plan templates, and clinical references for your patients. All files are stored securely under your RND account.</div>
+      </div>
+      <div style="display:flex;gap:10px;position:relative;z-index:1">
+        <button class="btn" onclick="openModal('upload-modal')" style="background:#EFBF04;color:#004D3A;font-weight:600;font-size:13px;padding:9px 20px;gap:7px">
+          <svg style="width:15px;height:15px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          Upload Resource
+        </button>
+        <button class="btn" style="background:rgba(255,255,255,.12);color:#FFFEF9;border:1px solid rgba(255,255,255,.2);font-size:12.5px">My Uploads</button>
+      </div>
+    </div>
+
+    <!-- Stats Row -->
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px">
+      <div style="background:#fff;border:1px solid var(--cream-border);border-radius:12px;padding:14px 16px;display:flex;align-items:center;gap:12px">
+        <div style="width:38px;height:38px;background:var(--green-muted);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:18px">📄</div>
+        <div><div style="font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:var(--green-dark)" id="lib-total">12</div><div style="font-size:11px;color:var(--gray600)">Total Resources</div></div>
+      </div>
+      <div style="background:#fff;border:1px solid var(--cream-border);border-radius:12px;padding:14px 16px;display:flex;align-items:center;gap:12px">
+        <div style="width:38px;height:38px;background:var(--gold-muted);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:18px">⬆️</div>
+        <div><div style="font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:var(--gold-dark)" id="lib-uploads">4</div><div style="font-size:11px;color:var(--gray600)">My Uploads</div></div>
+      </div>
+      <div style="background:#fff;border:1px solid var(--cream-border);border-radius:12px;padding:14px 16px;display:flex;align-items:center;gap:12px">
+        <div style="width:38px;height:38px;background:var(--green-muted);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:18px">👁️</div>
+        <div><div style="font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:var(--green-dark)">87</div><div style="font-size:11px;color:var(--gray600)">Patient Views</div></div>
+      </div>
+      <div style="background:#fff;border:1px solid var(--cream-border);border-radius:12px;padding:14px 16px;display:flex;align-items:center;gap:12px">
+        <div style="width:38px;height:38px;background:var(--gold-muted);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:18px">⬇️</div>
+        <div><div style="font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:var(--gold-dark)">34</div><div style="font-size:11px;color:var(--gray600)">Downloads</div></div>
+      </div>
+    </div>
+
+    <!-- Filter Bar -->
+    <div class="filter-bar" style="margin-bottom:18px">
+      <div class="search-box" style="max-width:280px">
+        <svg style="width:14px;height:14px;color:var(--gray400)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input id="lib-search" type="text" placeholder="Search resources..." oninput="filterResources()"/>
+      </div>
+      <select class="filter-select" id="lib-cat" onchange="filterResources()">
+        <option value="">All Categories</option>
+        <option value="Clinical Guide">Clinical Guide</option>
+        <option value="Patient Education">Patient Education</option>
+        <option value="Meal Plan">Meal Plan</option>
+        <option value="Template">Template</option>
+        <option value="Research">Research</option>
+      </select>
+      <select class="filter-select" id="lib-type" onchange="filterResources()">
+        <option value="">All Types</option>
+        <option value="PDF">PDF</option>
+        <option value="DOCX">DOCX</option>
+        <option value="PPTX">PPTX</option>
+        <option value="Image">Image</option>
+      </select>
+      <div style="margin-left:auto;display:flex;gap:8px">
+        <button onclick="setLibView('grid')" id="btn-grid" class="btn btn-sm btn-primary" style="padding:6px 10px">⊞ Grid</button>
+        <button onclick="setLibView('list')" id="btn-list" class="btn btn-sm btn-outline" style="padding:6px 10px">☰ List</button>
+      </div>
+    </div>
+
+    <!-- My Uploads Section -->
+    <div style="margin-bottom:22px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+        <div style="font-size:12px;font-weight:600;color:var(--gray600);text-transform:uppercase;letter-spacing:.8px">⬆ My Uploaded Resources</div>
+        <span class="tag tag-gold" id="upload-count-badge">4 files</span>
+      </div>
+      <div id="my-uploads-grid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px"></div>
+      <div id="my-uploads-list" style="display:none;flex-direction:column;gap:8px"></div>
+      <div id="no-uploads" style="display:none;text-align:center;padding:32px;background:#fff;border:2px dashed var(--cream-border);border-radius:14px">
+        <div style="font-size:36px;margin-bottom:10px">📭</div>
+        <div style="font-size:14px;font-weight:500;color:var(--green-dark);margin-bottom:4px">No uploads yet</div>
+        <div style="font-size:12.5px;color:var(--gray600);margin-bottom:14px">Be the first to share an educational resource with your patients.</div>
+        <button class="btn btn-primary" onclick="openModal('upload-modal')">Upload your first file</button>
+      </div>
+    </div>
+
+    <!-- Pinned Resources -->
+    <div style="margin-bottom:22px">
+      <div style="font-size:12px;font-weight:600;color:var(--gray600);text-transform:uppercase;letter-spacing:.8px;margin-bottom:12px">📌 Pinned Clinical References</div>
+      <div id="pinned-grid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px">
+        <div class="resource-card" onclick="showToast('Opening FNRI Food Exchange Lists…','📄')">
+          <div class="resource-icon" style="background:var(--green-muted)">📊</div>
+          <div class="resource-title">FNRI Food Exchange Lists 4th Ed.</div>
+          <div class="resource-desc">Philippine-specific food exchange reference for MNT planning</div>
+          <div class="resource-meta"><span class="resource-type" style="color:var(--green)">PDF</span><span class="tag tag-green" style="font-size:10px">Official</span></div>
+          <div style="margin-top:10px;display:flex;gap:6px">
+            <button class="btn btn-sm btn-outline" style="font-size:11px;flex:1" onclick="event.stopPropagation();showToast('Downloading…','⬇️')">Download</button>
+            <button class="btn btn-sm btn-primary" style="font-size:11px;flex:1" onclick="event.stopPropagation();showToast('Shared with patient','✅')">Share</button>
+          </div>
+        </div>
+        <div class="resource-card" onclick="showToast('Opening BMI Calculator…','🧮')">
+          <div class="resource-icon" style="background:var(--gold-muted)">🧮</div>
+          <div class="resource-title">BMI & IBW Calculator</div>
+          <div class="resource-desc">Auto-calculate BMI, IBW, and calorie needs using patient data</div>
+          <div class="resource-meta"><span class="resource-type" style="color:var(--gold-dark)">Tool</span><span class="tag tag-gold" style="font-size:10px">Interactive</span></div>
+          <div style="margin-top:10px;display:flex;gap:6px">
+            <button class="btn btn-sm btn-outline" style="font-size:11px;flex:1" onclick="event.stopPropagation();showToast('Downloading…','⬇️')">Download</button>
+            <button class="btn btn-sm btn-primary" style="font-size:11px;flex:1" onclick="event.stopPropagation();showToast('Shared with patient','✅')">Share</button>
+          </div>
+        </div>
+        <div class="resource-card" onclick="showToast('Opening NCP Template…','📋')">
+          <div class="resource-icon" style="background:var(--green-muted)">📋</div>
+          <div class="resource-title">NCP Documentation Template</div>
+          <div class="resource-desc">4-phase NCP template pre-formatted for RA 10173 compliance</div>
+          <div class="resource-meta"><span class="resource-type" style="color:var(--green-dark)">DOCX</span><span class="tag tag-green" style="font-size:10px">Compliance</span></div>
+          <div style="margin-top:10px;display:flex;gap:6px">
+            <button class="btn btn-sm btn-outline" style="font-size:11px;flex:1" onclick="event.stopPropagation();showToast('Downloading…','⬇️')">Download</button>
+            <button class="btn btn-sm btn-primary" style="font-size:11px;flex:1" onclick="event.stopPropagation();showToast('Shared with patient','✅')">Share</button>
+          </div>
+        </div>
+        <div class="resource-card" onclick="showToast('Opening T2DM Protocol…','🏥')">
+          <div class="resource-icon" style="background:#FEF9E0">🏥</div>
+          <div class="resource-title">T2DM MNT Protocol 2024</div>
+          <div class="resource-desc">Evidence-based MNT protocol for Type 2 Diabetes management</div>
+          <div class="resource-meta"><span class="resource-type" style="color:var(--gold-dark)">PDF</span><span class="tag tag-gold" style="font-size:10px">Clinical</span></div>
+          <div style="margin-top:10px;display:flex;gap:6px">
+            <button class="btn btn-sm btn-outline" style="font-size:11px;flex:1" onclick="event.stopPropagation();showToast('Downloading…','⬇️')">Download</button>
+            <button class="btn btn-sm btn-primary" style="font-size:11px;flex:1" onclick="event.stopPropagation();showToast('Shared with patient','✅')">Share</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Patient Education Materials -->
+    <div>
+      <div style="font-size:12px;font-weight:600;color:var(--gray600);text-transform:uppercase;letter-spacing:.8px;margin-bottom:12px">🧑‍⚕️ Patient Education Materials</div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px">
+        <div class="resource-card" onclick="showToast('Opening Healthy Filipino Eating Guide…','🥗')">
+          <div class="resource-icon" style="background:var(--green-muted)">🥗</div>
+          <div class="resource-title">Healthy Filipino Eating Guide</div>
+          <div class="resource-desc">Patient-friendly visual guide to balanced Filipino meals</div>
+          <div class="resource-meta"><span class="resource-type" style="color:var(--green)">Handout</span><span class="tag tag-green" style="font-size:10px">Patient</span></div>
+          <div style="margin-top:10px;display:flex;gap:6px">
+            <button class="btn btn-sm btn-outline" style="font-size:11px;flex:1" onclick="event.stopPropagation();showToast('Downloading…','⬇️')">Download</button>
+            <button class="btn btn-sm btn-primary" style="font-size:11px;flex:1" onclick="event.stopPropagation();showToast('Shared with patient','✅')">Share</button>
+          </div>
+        </div>
+        <div class="resource-card" onclick="showToast('Opening Low-GI Filipino Foods List…','🍚')">
+          <div class="resource-icon" style="background:var(--gold-muted)">🍚</div>
+          <div class="resource-title">Low-GI Filipino Foods List</div>
+          <div class="resource-desc">Glycemic index reference for common Philippine foods</div>
+          <div class="resource-meta"><span class="resource-type" style="color:var(--gold-dark)">PDF</span><span class="tag tag-gold" style="font-size:10px">Patient</span></div>
+          <div style="margin-top:10px;display:flex;gap:6px">
+            <button class="btn btn-sm btn-outline" style="font-size:11px;flex:1" onclick="event.stopPropagation();showToast('Downloading…','⬇️')">Download</button>
+            <button class="btn btn-sm btn-primary" style="font-size:11px;flex:1" onclick="event.stopPropagation();showToast('Shared with patient','✅')">Share</button>
+          </div>
+        </div>
+        <div class="resource-card" onclick="showToast('Opening DASH Diet Guide…','💊')">
+          <div class="resource-icon" style="background:var(--green-muted)">💊</div>
+          <div class="resource-title">DASH Diet for Filipinos</div>
+          <div class="resource-desc">Localized DASH diet guide using accessible Filipino ingredients</div>
+          <div class="resource-meta"><span class="resource-type" style="color:var(--green-dark)">PDF</span><span class="tag tag-green" style="font-size:10px">Patient</span></div>
+          <div style="margin-top:10px;display:flex;gap:6px">
+            <button class="btn btn-sm btn-outline" style="font-size:11px;flex:1" onclick="event.stopPropagation();showToast('Downloading…','⬇️')">Download</button>
+            <button class="btn btn-sm btn-primary" style="font-size:11px;flex:1" onclick="event.stopPropagation();showToast('Shared with patient','✅')">Share</button>
+          </div>
+        </div>
+        <div class="resource-card" onclick="showToast('Opening CKD Dietary Restrictions…','🩺')">
+          <div class="resource-icon" style="background:#FEF9E0">🩺</div>
+          <div class="resource-title">CKD Dietary Restrictions</div>
+          <div class="resource-desc">Potassium, phosphorus, and sodium restriction guide for CKD</div>
+          <div class="resource-meta"><span class="resource-type" style="color:var(--gold-dark)">PDF</span><span class="tag tag-gold" style="font-size:10px">Patient</span></div>
+          <div style="margin-top:10px;display:flex;gap:6px">
+            <button class="btn btn-sm btn-outline" style="font-size:11px;flex:1" onclick="event.stopPropagation();showToast('Downloading…','⬇️')">Download</button>
+            <button class="btn btn-sm btn-primary" style="font-size:11px;flex:1" onclick="event.stopPropagation();showToast('Shared with patient','✅')">Share</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ PAGE: BILLING ══ -->
+  <div class="page" id="page-billing">
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px">
+      <div class="card" style="text-align:center;border-top:3px solid var(--green)">
+        <div class="billing-stat-val" style="color:var(--green)">₱48,500</div>
+        <div class="billing-stat-label">Total Revenue — April</div>
+      </div>
+      <div class="card" style="text-align:center;border-top:3px solid var(--gold)">
+        <div class="billing-stat-val">₱12,800</div>
+        <div class="billing-stat-label">Outstanding Balance</div>
+      </div>
+      <div class="card" style="text-align:center;border-top:3px solid var(--green)">
+        <div class="billing-stat-val">18</div>
+        <div class="billing-stat-label">Invoices This Month</div>
+      </div>
+      <div class="card" style="text-align:center;border-top:3px solid #DC2626">
+        <div class="billing-stat-val" style="color:#DC2626">4</div>
+        <div class="billing-stat-label">Overdue Invoices</div>
+      </div>
+    </div>
+
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+      <div class="section-title">Recent Invoices</div>
+      <div style="display:flex;gap:8px">
+        <select class="filter-select"><option>All Status</option><option>Paid</option><option>Pending</option><option>Overdue</option></select>
+        <button class="btn btn-primary btn-sm">+ New Invoice</button>
+      </div>
+    </div>
+
+    <div id="invoice-list"></div>
+  </div>
+
+  <!-- ══ PAGE: SETTINGS ══ -->
+  <div class="page" id="page-settings">
+    <div class="settings-nav">
+      <div class="s-tab active" onclick="switchTab(this,'s-profile')">Profile & License</div>
+      <div class="s-tab" onclick="switchTab(this,'s-notif')">Notifications</div>
+      <div class="s-tab" onclick="switchTab(this,'s-privacy')">Privacy & Compliance</div>
+      <div class="s-tab" onclick="switchTab(this,'s-clinical')">Clinical Preferences</div>
+      <div class="s-tab" onclick="switchTab(this,'s-system')">System</div>
+    </div>
+
+    <div id="s-profile" class="s-panel">
+      <div class="card" style="margin-bottom:16px">
+        <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px">
+          <div style="width:64px;height:64px;border-radius:14px;background:linear-gradient(135deg,var(--green),var(--green-light));display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;color:var(--cream);font-family:'Playfair Display',serif">KP</div>
+          <div>
+            <div style="font-size:17px;font-weight:600;color:var(--green-dark);font-family:'Playfair Display',serif">Kristine Perez, RND</div>
+            <div style="font-size:13px;color:var(--gray600)">Clinical Dietitian · NutriMatch ID: NM-RND-00182</div>
+            <div style="margin-top:6px"><span class="tag tag-green">Active License</span></div>
+          </div>
+          <button class="btn btn-outline btn-sm" style="margin-left:auto">Edit Profile</button>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+          <div><label class="form-label">Full Name</label><input class="input-field" value="Kristine Perez"/></div>
+          <div><label class="form-label">Email Address</label><input class="input-field" value="k.perez@nutrimatch.ph"/></div>
+          <div><label class="form-label">PRC License No.</label><input class="input-field" value="RND-0042187"/></div>
+          <div><label class="form-label">License Expiry</label><input class="input-field" value="December 31, 2026"/></div>
+          <div><label class="form-label">Specialization</label><input class="input-field" value="Clinical Nutrition, MNT for NCDs"/></div>
+          <div><label class="form-label">Clinic / Hospital</label><input class="input-field" value="STI Medical Center, Davao"/></div>
+        </div>
+      </div>
+      <button class="btn btn-primary">Save Changes</button>
+    </div>
+
+    <div id="s-notif" class="s-panel" style="display:none">
+      <div class="card">
+        <div class="setting-row">
+          <div><div class="setting-label">Appointment Reminders</div><div class="setting-desc">Notify 1 hour before scheduled appointments</div></div>
+          <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+        </div>
+        <div class="setting-row">
+          <div><div class="setting-label">NCP Review Alerts</div><div class="setting-desc">Alert when NCP records are overdue for update</div></div>
+          <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+        </div>
+        <div class="setting-row">
+          <div><div class="setting-label">Patient Meal Log Updates</div><div class="setting-desc">Notify when patients submit meal adherence logs</div></div>
+          <div class="toggle" onclick="this.classList.toggle('on')"></div>
+        </div>
+        <div class="setting-row">
+          <div><div class="setting-label">RA 10173 Compliance Alerts</div><div class="setting-desc">Remind for patient re-consent and data review deadlines</div></div>
+          <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+        </div>
+        <div class="setting-row">
+          <div><div class="setting-label">Billing Notifications</div><div class="setting-desc">Alert for overdue invoices and payment confirmations</div></div>
+          <div class="toggle" onclick="this.classList.toggle('on')"></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="s-privacy" class="s-panel" style="display:none">
+      <div class="card" style="border-left:4px solid var(--green)">
+        <div style="font-size:13px;font-weight:600;color:var(--green);margin-bottom:6px">RA 10173 — Data Privacy Act of 2012 Compliance</div>
+        <div style="font-size:12.5px;color:var(--gray600);line-height:1.6">NutriMatch implements role-based access control, audit logging, consent management, and breach notification procedures in compliance with the Philippine Data Privacy Act of 2012 and NPC Circular 16-01.</div>
+      </div>
+      <div class="card" style="margin-top:14px">
+        <div class="setting-row"><div><div class="setting-label">Audit Log</div><div class="setting-desc">Record all patient data access and modifications</div></div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+        <div class="setting-row"><div><div class="setting-label">Consent Tracking</div><div class="setting-desc">Track and manage patient informed consent status</div></div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+        <div class="setting-row"><div><div class="setting-label">Session Timeout</div><div class="setting-desc">Auto-logout after 15 minutes of inactivity</div></div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+        <div class="setting-row"><div><div class="setting-label">Data Export Controls</div><div class="setting-desc">Require 2FA verification before exporting patient data</div></div><div class="toggle" onclick="this.classList.toggle('on')"></div></div>
+      </div>
+    </div>
+
+    <div id="s-clinical" class="s-panel" style="display:none">
+      <div class="card">
+        <div class="setting-row"><div><div class="setting-label">Default Food Exchange Reference</div><div class="setting-desc">FNRI Food Exchange Lists, 4th Edition (2020)</div></div><select class="filter-select"><option>FNRI 4th Ed. (2020)</option></select></div>
+        <div class="setting-row"><div><div class="setting-label">NCP Template Version</div><div class="setting-desc">Nutrition Care Process format per AND guidelines</div></div><select class="filter-select"><option>AND NCP 2024</option></select></div>
+        <div class="setting-row"><div><div class="setting-label">Default Calorie Calculation Method</div><div class="setting-desc">Formula used for estimated energy requirements</div></div><select class="filter-select"><option>Mifflin-St Jeor</option><option>Harris-Benedict</option></select></div>
+        <div class="setting-row"><div><div class="setting-label">Weight Unit</div></div><div style="display:flex;gap:8px"><button class="btn btn-primary btn-sm">kg</button><button class="btn btn-outline btn-sm">lbs</button></div></div>
+      </div>
+    </div>
+
+    <div id="s-system" class="s-panel" style="display:none">
+      <div class="card">
+        <div class="setting-row"><div><div class="setting-label">Language</div></div><select class="filter-select"><option>English (Philippines)</option><option>Filipino</option></select></div>
+        <div class="setting-row"><div><div class="setting-label">Time Zone</div></div><select class="filter-select"><option>Asia/Manila (UTC+8)</option></select></div>
+        <div class="setting-row"><div><div class="setting-label">Dark Mode</div><div class="setting-desc">Switch interface to dark theme</div></div><div class="toggle" onclick="this.classList.toggle('on')"></div></div>
+        <div class="setting-row"><div><div class="setting-label">NutriMatch Version</div><div class="setting-desc">v1.0.0 — Build 20260427</div></div><button class="btn btn-outline btn-sm">Check Updates</button></div>
+      </div>
+      <div style="margin-top:14px"><button class="btn" style="background:#FEE2E2;color:#DC2626;border:1px solid #FECACA">Sign Out of All Devices</button></div>
+    </div>
+  </div>
+</main>
+
+<script>
+// ── Dashboard Tab Switcher ──
+function switchDash(panelId, btn){
+  ['dash-main','dash-schedule','dash-announcements','dash-reports'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el) el.style.display='none';
+  });
+  const panel=document.getElementById(panelId);
+  if(panel) panel.style.display='block';
+  document.querySelectorAll('#page-dashboard button[onclick*=switchDash]').forEach(b=>{
+    b.style.background='transparent';
+    b.style.color='var(--gray600)';
+    b.style.borderBottom='2px solid transparent';
+  });
+  btn.style.background='#00674F';
+  btn.style.color='#FDFBD4';
+  btn.style.borderBottom='2px solid #00674F';
+  // build schedule calendar if needed
+  if(panelId==='dash-schedule') buildDashCal();
+}
+
+// ── Mini Calendar (sidebar) ──
+(function buildMiniCal(){
+  const grid=document.getElementById('mini-cal-grid');
+  if(!grid) return;
+  const apptDays=[3,7,10,14,15,18,21,22,25,27,28];
+  for(let i=0;i<3;i++){
+    const e=document.createElement('div');
+    e.style.cssText='aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--gray200)';
+    grid.appendChild(e);
+  }
+  for(let i=1;i<=30;i++){
+    const d=document.createElement('div');
+    const isToday=i===27, hasAppt=apptDays.includes(i);
+    d.style.cssText=`aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:11px;border-radius:5px;cursor:pointer;font-weight:${isToday?'700':'400'};position:relative;transition:all .15s;${isToday?'background:#EFBF04;color:#003328;':'color:#003328;'}`;
+    d.textContent=i;
+    if(hasAppt&&!isToday){
+      const dot=document.createElement('span');
+      dot.style.cssText='position:absolute;bottom:2px;left:50%;transform:translateX(-50%);width:4px;height:4px;background:#00674F;border-radius:50%';
+      d.appendChild(dot);
+    }
+    d.addEventListener('mouseover',()=>{ if(!isToday) d.style.background='#E6F2EF'; });
+    d.addEventListener('mouseout',()=>{ if(!isToday) d.style.background=''; });
+    d.addEventListener('click',()=>showToast('April '+i+' selected','📅'));
+    grid.appendChild(d);
+  }
+})();
+
+// ── Schedule Calendar (My Schedule tab) ──
+function buildDashCal(){
+  const grid=document.getElementById('dash-cal-days');
+  if(!grid||grid.children.length>0) return;
+  const headers=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  headers.forEach(h=>{
+    const hd=document.createElement('div');
+    hd.style.cssText='text-align:center;font-size:10.5px;font-weight:600;color:var(--gray600);text-transform:uppercase;letter-spacing:.8px;padding:6px 0';
+    hd.textContent=h; grid.appendChild(hd);
+  });
+  const apptDays=[3,7,10,14,15,18,21,22,25,27,28];
+  for(let i=0;i<3;i++){
+    const e=document.createElement('div');
+    e.style.cssText='aspect-ratio:1;border-radius:8px;opacity:.3;background:var(--gray50);border:1px solid var(--cream-border)';
+    grid.appendChild(e);
+  }
+  for(let i=1;i<=30;i++){
+    const d=document.createElement('div');
+    const isToday=i===27, hasAppt=apptDays.includes(i);
+    d.style.cssText=`aspect-ratio:1;border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:5px;cursor:pointer;transition:all .15s;position:relative;border:1px solid ${isToday?'#EFBF04':hasAppt?'#b3d9cf':'var(--cream-border)'};background:${isToday?'#FEF9E0':'#fff'}`;
+    const num=document.createElement('span');
+    num.style.cssText=`font-size:11px;font-weight:${isToday?'700':'500'};color:${isToday?'#C49D00':'#003328'}`;
+    num.textContent=i; d.appendChild(num);
+    if(hasAppt){
+      const dot=document.createElement('div');
+      dot.style.cssText='width:5px;height:5px;background:#00674F;border-radius:50%;position:absolute;bottom:4px;left:50%;transform:translateX(-50%)';
+      d.appendChild(dot);
+    }
+    d.addEventListener('click',()=>showToast('April '+i+' — click to add appointment','📅'));
+    grid.appendChild(d);
+  }
+}
+
+// ── Navigation helper for inline onclick ──
+const pages={dashboard:'Dashboard',patients:'My Patients',appointments:'Appointments',ncp:'NCP Records',meals:'Meal Planning',progress:'Progress Reports',library:'Resource Library',billing:'Billing',settings:'Settings'};
+function navigate(id,el){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  el.classList.add('active');
+  document.getElementById('page-title').textContent=pages[id];
+  document.getElementById('page-breadcrumb').textContent='NutriMatch › '+pages[id];
+}
+function switchTab(el,panelId){
+  document.querySelectorAll('.s-tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.s-panel').forEach(p=>p.style.display='none');
+  el.classList.add('active');
+  document.getElementById(panelId).style.display='block';
+}
+
+// ── Calendar ──
+const daysEl=document.getElementById('cal-days');
+const apptDays=[3,7,10,14,15,18,21,22,25,27,28];
+for(let i=1;i<=30;i++){
+  const d=document.createElement('div');
+  d.className='cal-day'+(i===27?' today':'')+(apptDays.includes(i)?' has-appt':'');
+  d.innerHTML=`<span class="cal-num">${i}</span>`;
+  daysEl.appendChild(d);
+}
+// Add leading empty cells (April 2026 starts Wednesday)
+const calGrid=document.getElementById('cal-days');
+for(let i=0;i<3;i++){const e=document.createElement('div');e.className='cal-day other-month';e.innerHTML='<span class="cal-num"></span>';calGrid.insertBefore(e,calGrid.firstChild);}
+
+// ── Patient Table ──
+const patients=[
+  {name:'Maria Lourdes Santos',id:'PT-001',age:'42F',cond:'T2DM',visit:'Apr 25, 2026',status:'Active',adh:78,phase:3},
+  {name:'Jose Ramon Cruz',id:'PT-002',age:'56M',cond:'Hypertension',visit:'Apr 22, 2026',status:'Active',adh:85,phase:4},
+  {name:'Ana Luisa Reyes',id:'PT-003',age:'35F',cond:'Obesity',visit:'Apr 20, 2026',status:'Active',adh:62,phase:2},
+  {name:'Roberto Bautista',id:'PT-004',age:'61M',cond:'CKD',visit:'Apr 27, 2026',status:'Active',adh:71,phase:1},
+  {name:'Elena Villanueva',id:'PT-005',age:'48F',cond:'T2DM + Hypertension',visit:'Apr 18, 2026',status:'Active',adh:90,phase:4},
+  {name:'Marco Dela Cruz',id:'PT-006',age:'29M',cond:'Underweight',visit:'Apr 15, 2026',status:'Active',adh:55,phase:2},
+  {name:'Lourdes Magno',id:'PT-007',age:'67F',cond:'CKD Stage 3',visit:'Apr 12, 2026',status:'Active',adh:80,phase:3},
+  {name:'Ferdinand Santos',id:'PT-008',age:'44M',cond:'Dyslipidemia',visit:'Apr 10, 2026',status:'Active',adh:66,phase:2},
+  {name:'Carmelita Ocampo',id:'PT-009',age:'53F',cond:'Obesity',visit:'Apr 8, 2026',status:'Inactive',adh:0,phase:4},
+  {name:'Ricardo Fernandez',id:'PT-010',age:'39M',cond:'T2DM',visit:'Apr 5, 2026',status:'Active',adh:74,phase:3},
+];
+const colors=['#E6F2EF','#FEF9E0','#E6F2EF','#FEF9E0','#E6F2EF','#FEF9E0','#E6F2EF','#FEF9E0','#FEF9E0','#E6F2EF'];
+const tcolors=['#00674F','#8B6D00','#004D3A','#C49D00','#00674F','#C49D00','#004D3A','#00674F','#8B6D00','#004D3A'];
+const tbody=document.getElementById('patient-tbody');
+patients.forEach((p,i)=>{
+  const initials=p.name.split(' ').slice(0,2).map(w=>w[0]).join('');
+  const phaseColor=p.phase>=4?'var(--gold)':p.phase>=3?'var(--green)':'var(--green-dark)';
+  const phaseLabel=['','Assessment','Diagnosis','Intervention','Monitoring'][p.phase];
+  const statusCls=p.status==='Active'?'tag-green':p.status==='Inactive'?'tag-gray':'tag-red';
+  const adhColor=p.adh>=80?'var(--green)':p.adh>=60?'var(--gold)':'#DC2626';
+  tbody.innerHTML+=`<tr>
+    <td><div class="pt-cell"><div class="pt-avatar" style="background:${colors[i]};color:${tcolors[i]}">${initials}</div><div><div class="pt-name">${p.name}</div><div class="pt-id">${p.id}</div></div></div></td>
+    <td style="font-size:13px">${p.age}</td>
+    <td><span class="tag tag-blue" style="font-size:11.5px">${p.cond}</span></td>
+    <td style="font-size:13px;color:var(--gray600)">${p.visit}</td>
+    <td><span class="tag" style="background:${p.phase>=4?'var(--gold-muted)':p.phase>=3?'var(--green-muted)':'var(--green-muted)'};color:${phaseColor};font-size:11px">NCP ${p.phase} — ${phaseLabel}</span></td>
+    <td>${p.adh>0?`<div style="display:flex;align-items:center;gap:6px"><div style="width:60px;height:5px;background:var(--gray100);border-radius:3px"><div style="width:${p.adh}%;height:100%;background:${adhColor};border-radius:3px"></div></div><span style="font-size:11px;font-family:'DM Mono',monospace;color:${adhColor}">${p.adh}%</span></div>`:'<span style="font-size:12px;color:var(--gray400)">—</span>'}</td>
+    <td><div style="display:flex;gap:6px"><button class="btn btn-sm btn-outline" style="font-size:11px;padding:4px 8px">View</button><button class="btn btn-sm btn-primary" style="font-size:11px;padding:4px 8px">NCP</button></div></td>
+  </tr>`;
+});
+
+// ── Invoices ──
+const invoices=[
+  {num:'INV-2026-0118',patient:'Maria Lourdes Santos',service:'Initial Assessment + MNT Consultation',amount:'₱2,500',status:'Paid',date:'Apr 25'},
+  {num:'INV-2026-0117',patient:'Jose Ramon Cruz',service:'Follow-up Consultation x2',amount:'₱1,800',status:'Paid',date:'Apr 22'},
+  {num:'INV-2026-0116',patient:'Ana Luisa Reyes',service:'Telehealth + Meal Plan Package',amount:'₱3,200',status:'Pending',date:'Apr 20'},
+  {num:'INV-2026-0115',patient:'Roberto Bautista',service:'Initial Assessment — CKD Protocol',amount:'₱2,500',status:'Pending',date:'Apr 15'},
+  {num:'INV-2026-0112',patient:'Elena Villanueva',service:'Monthly MNT Package',amount:'₱4,500',status:'Overdue',date:'Apr 1'},
+];
+const invList=document.getElementById('invoice-list');
+invoices.forEach(inv=>{
+  const sc=inv.status==='Paid'?'tag-green':inv.status==='Pending'?'tag-gold':'tag-red';
+  invList.innerHTML+=`<div class="invoice-row" onclick="showToast('Viewing invoice ${inv.num}','📄')">
+    <div class="inv-num">${inv.num}<br><span style="font-size:10px;color:var(--gray400)">${inv.date}</span></div>
+    <div><div class="inv-patient">${inv.patient}</div><div class="inv-service">${inv.service}</div></div>
+    <span class="tag ${sc}">${inv.status}</span>
+    <div class="inv-amount">${inv.amount}</div>
+  </div>`;
+});
+
+// ── Uploaded Resources Store ──
+let uploadedResources=[
+  {id:1,title:'Diabetes Meal Plan Template',category:'Meal Plan',type:'PDF',desc:'Weekly meal plan framework for T2DM patients using FNRI exchanges.',emoji:'📋',date:'Apr 20, 2026',size:'1.2 MB'},
+  {id:2,title:'Hypertension Food List (Filipino)',category:'Patient Education',type:'PDF',desc:'DASH-friendly Filipino foods with sodium content reference.',emoji:'🥬',date:'Apr 18, 2026',size:'845 KB'},
+  {id:3,title:'NutriMatch Patient Consent Form',category:'Template',type:'DOCX',desc:'Fillable RA 10173-compliant consent form for new patients.',emoji:'📝',date:'Apr 12, 2026',size:'322 KB'},
+  {id:4,title:'CKD Renal Diet Infographic',category:'Patient Education',type:'Image',desc:'Visual infographic on allowed/restricted foods for CKD stages 3–4.',emoji:'🩺',date:'Apr 5, 2026',size:'2.1 MB'},
+];
+let libView='grid';
+
+function setLibView(v){
+  libView=v;
+  document.getElementById('btn-grid').className='btn btn-sm '+(v==='grid'?'btn-primary':'btn-outline');
+  document.getElementById('btn-list').className='btn btn-sm '+(v==='list'?'btn-primary':'btn-outline');
+  document.getElementById('btn-grid').style.padding='6px 10px';
+  document.getElementById('btn-list').style.padding='6px 10px';
+  renderUploads();
+}
+
+function getTypeColor(type){
+  return type==='PDF'?'var(--green)':type==='DOCX'?'var(--gold-dark)':type==='PPTX'?'#C49D00':'var(--green-dark)';
+}
+
+function renderUploads(){
+  const search=(document.getElementById('lib-search')||{}).value?.toLowerCase()||'';
+  const cat=(document.getElementById('lib-cat')||{}).value||'';
+  const type=(document.getElementById('lib-type')||{}).value||'';
+  const filtered=uploadedResources.filter(r=>
+    (!search||r.title.toLowerCase().includes(search)||r.desc.toLowerCase().includes(search))&&
+    (!cat||r.category===cat)&&
+    (!type||r.type===type)
+  );
+  const grid=document.getElementById('my-uploads-grid');
+  const list=document.getElementById('my-uploads-list');
+  const none=document.getElementById('no-uploads');
+  const badge=document.getElementById('upload-count-badge');
+  badge.textContent=uploadedResources.length+' files';
+  document.getElementById('lib-uploads').textContent=uploadedResources.length;
+  document.getElementById('lib-total').textContent=uploadedResources.length+8;
+  if(filtered.length===0){
+    grid.style.display='none';list.style.display='none';none.style.display='block';return;
+  }
+  none.style.display='none';
+  if(libView==='grid'){
+    grid.style.display='grid';list.style.display='none';
+    grid.innerHTML=filtered.map(r=>`
+      <div class="resource-card" style="position:relative" onclick="showToast('Opening ${r.title}…','${r.emoji}')">
+        <button onclick="event.stopPropagation();deleteResource(${r.id})" style="position:absolute;top:10px;right:10px;width:24px;height:24px;border-radius:6px;background:#FEE2E2;border:none;color:#DC2626;cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;line-height:1">×</button>
+        <div class="resource-icon" style="background:var(--gold-muted)">${r.emoji}</div>
+        <div class="resource-title">${r.title}</div>
+        <div class="resource-desc">${r.desc}</div>
+        <div style="margin-top:8px;display:flex;align-items:center;gap:6px">
+          <span style="font-size:10px;font-weight:600;color:${getTypeColor(r.type)};text-transform:uppercase">${r.type}</span>
+          <span class="tag tag-gold" style="font-size:10px">${r.category}</span>
+        </div>
+        <div style="font-size:10.5px;color:var(--gray400);margin-top:6px">${r.date} · ${r.size}</div>
+        <div style="margin-top:10px;display:flex;gap:6px">
+          <button class="btn btn-sm btn-outline" style="font-size:11px;flex:1" onclick="event.stopPropagation();showToast('Downloading ${r.title}…','⬇️')">Download</button>
+          <button class="btn btn-sm btn-primary" style="font-size:11px;flex:1" onclick="event.stopPropagation();showToast('${r.title} shared with patient','✅')">Share</button>
+        </div>
+      </div>`).join('');
+  } else {
+    grid.style.display='none';list.style.display='flex';list.style.flexDirection='column';list.style.gap='8px';
+    list.innerHTML=filtered.map(r=>`
+      <div style="background:#fff;border:1px solid var(--cream-border);border-radius:10px;padding:13px 16px;display:flex;align-items:center;gap:14px;cursor:pointer;transition:border .15s" onclick="showToast('Opening ${r.title}…','${r.emoji}')" onmouseover="this.style.borderColor='var(--green)'" onmouseout="this.style.borderColor='var(--cream-border)'">
+        <div style="width:40px;height:40px;background:var(--gold-muted);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">${r.emoji}</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:13.5px;font-weight:500;color:var(--green-dark)">${r.title}</div>
+          <div style="font-size:12px;color:var(--gray600);margin-top:2px">${r.desc}</div>
+          <div style="font-size:11px;color:var(--gray400);margin-top:3px">${r.date} · ${r.size}</div>
+        </div>
+        <span class="tag tag-gold" style="font-size:10.5px">${r.category}</span>
+        <span style="font-size:11px;font-weight:600;color:${getTypeColor(r.type)};text-transform:uppercase;min-width:36px;text-align:center">${r.type}</span>
+        <div style="display:flex;gap:6px">
+          <button class="btn btn-sm btn-outline" style="font-size:11px" onclick="event.stopPropagation();showToast('Downloading…','⬇️')">⬇</button>
+          <button class="btn btn-sm btn-primary" style="font-size:11px" onclick="event.stopPropagation();showToast('Shared!','✅')">Share</button>
+          <button style="width:28px;height:28px;border-radius:6px;background:#FEE2E2;border:none;color:#DC2626;cursor:pointer;font-size:14px" onclick="event.stopPropagation();deleteResource(${r.id})">×</button>
+        </div>
+      </div>`).join('');
+  }
+}
+
+function filterResources(){ renderUploads(); }
+
+function deleteResource(id){
+  uploadedResources=uploadedResources.filter(r=>r.id!==id);
+  renderUploads();
+  showToast('Resource deleted','🗑️');
+}
+
+renderUploads();
+
+// ── Toast ──
+function showToast(msg,icon='✅'){
+  let t=document.getElementById('toast');
+  if(!t){t=document.createElement('div');t.id='toast';t.style.cssText='position:fixed;bottom:24px;right:24px;background:var(--green-dark);color:var(--cream);padding:12px 20px;border-radius:12px;font-size:13px;font-weight:500;display:flex;align-items:center;gap:8px;z-index:9999;box-shadow:0 6px 24px rgba(0,0,0,.18);transform:translateY(80px);transition:transform .25s ease;max-width:320px';document.body.appendChild(t);}
+  t.innerHTML=`<span style="font-size:16px">${icon}</span><span>${msg}</span>`;
+  t.style.transform='translateY(0)';
+  clearTimeout(t._tmr);
+  t._tmr=setTimeout(()=>{t.style.transform='translateY(80px)';},3000);
+}
+
+// ── Modal System ──
+function openModal(id){
+  document.getElementById(id).style.display='flex';
+  document.body.style.overflow='hidden';
+}
+function closeModal(id){
+  document.getElementById(id).style.display='none';
+  document.body.style.overflow='';
+}
+document.addEventListener('keydown',e=>{ if(e.key==='Escape') document.querySelectorAll('.modal-overlay').forEach(m=>m.style.display='none'); });
+
+// ── Patient Search ──
+document.querySelector('#page-patients .search-box input')?.addEventListener('input',function(){
+  const q=this.value.toLowerCase();
+  document.querySelectorAll('#patient-tbody tr').forEach(row=>{
+    row.style.display=row.textContent.toLowerCase().includes(q)?'':'none';
+  });
+});
+
+// ── Patient Filter Select ──
+document.querySelectorAll('#page-patients .filter-select').forEach(sel=>{
+  sel.addEventListener('change',()=>{
+    const cond=document.querySelectorAll('#page-patients .filter-select')[0].value;
+    const status=document.querySelectorAll('#page-patients .filter-select')[1].value;
+    document.querySelectorAll('#patient-tbody tr').forEach(row=>{
+      const t=row.textContent;
+      const condOk=cond==='All Conditions'||t.includes(cond);
+      const statusOk=status==='All Status'||t.includes(status);
+      row.style.display=(condOk&&statusOk)?'':'none';
+    });
+  });
+});
+
+// ── Upload Resource Form ──
+document.getElementById('upload-form').addEventListener('submit',function(e){
+  e.preventDefault();
+  const title=document.getElementById('up-title').value.trim();
+  const cat=document.getElementById('up-cat').value;
+  const type=document.getElementById('up-type').value;
+  const desc=document.getElementById('up-desc').value.trim();
+  const file=document.getElementById('up-file').files[0];
+  if(!title||!cat||!desc){showToast('Please fill in all required fields','⚠️');return;}
+  const emojis={PDF:'📄',DOCX:'📝',PPTX:'📊',Image:'🖼️'};
+  const newRes={
+    id:Date.now(),
+    title,category:cat,type,
+    desc:desc||'Uploaded resource',
+    emoji:emojis[type]||'📄',
+    date:'Apr 27, 2026',
+    size:file?((file.size/1024)>1000?(file.size/1048576).toFixed(1)+' MB':(file.size/1024).toFixed(0)+' KB'):'—'
+  };
+  uploadedResources.unshift(newRes);
+  renderUploads();
+  closeModal('upload-modal');
+  this.reset();
+  document.getElementById('drop-zone-label').textContent='Drag & drop or click to browse';
+  showToast('"'+title+'" uploaded successfully!','🎉');
+});
+
+// ── Add Patient Form ──
+document.getElementById('patient-form').addEventListener('submit',function(e){
+  e.preventDefault();
+  const name=document.getElementById('pt-name').value.trim();
+  if(!name){showToast('Patient name is required','⚠️');return;}
+  showToast(name+' added to patient list!','👤');
+  closeModal('patient-modal');
+  this.reset();
+});
+
+// ── Add Appointment Form ──
+document.getElementById('appt-form').addEventListener('submit',function(e){
+  e.preventDefault();
+  showToast('Appointment scheduled successfully!','📅');
+  closeModal('appt-modal');
+  this.reset();
+});
+
+// ── New Invoice Form ──
+document.getElementById('inv-form').addEventListener('submit',function(e){
+  e.preventDefault();
+  showToast('Invoice created successfully!','💳');
+  closeModal('inv-modal');
+  this.reset();
+});
+
+// ── Settings Save ──
+document.querySelectorAll('#page-settings .btn-primary').forEach(btn=>{
+  btn.addEventListener('click',()=>showToast('Settings saved successfully!','💾'));
+});
+
+// ── Export / Report Buttons ──
+document.querySelectorAll('[data-action]').forEach(btn=>{
+  btn.addEventListener('click',()=>showToast(btn.dataset.action,'📄'));
+});
+
+// ── Calendar days ──
+document.querySelectorAll('.cal-day').forEach(d=>{
+  d.addEventListener('click',()=>{
+    const num=d.querySelector('.cal-num')?.textContent;
+    if(num) showToast('April '+num+' selected','📅');
+  });
+});
+
+// ── NCP + Meal + Progress buttons ──
+document.querySelectorAll('#page-ncp .btn-primary').forEach(b=>b.addEventListener('click',()=>showToast('NCP Record created!','📋')));
+document.querySelectorAll('#page-meals .btn-primary').forEach(b=>b.addEventListener('click',()=>showToast('Meal plan generated!','🥗')));
+document.querySelectorAll('#page-meals .btn-outline').forEach(b=>b.addEventListener('click',()=>showToast('Meal plan exported to PDF!','📄')));
+document.querySelectorAll('#page-progress .btn-primary').forEach(b=>b.addEventListener('click',()=>showToast('Progress report generated!','📊')));
+document.querySelectorAll('#page-progress .btn-outline').forEach(b=>b.addEventListener('click',()=>showToast('Report exported to PDF!','📄')));
+
+// ── Drag & drop file zone ──
+const dropZone=document.getElementById('drop-zone');
+if(dropZone){
+  dropZone.addEventListener('dragover',e=>{e.preventDefault();dropZone.style.borderColor='var(--green)';dropZone.style.background='var(--green-muted)';});
+  dropZone.addEventListener('dragleave',()=>{dropZone.style.borderColor='var(--cream-border)';dropZone.style.background='#FFFEF9';});
+  dropZone.addEventListener('drop',e=>{
+    e.preventDefault();dropZone.style.borderColor='var(--cream-border)';dropZone.style.background='#FFFEF9';
+    const f=e.dataTransfer.files[0];
+    if(f){document.getElementById('up-file').files;document.getElementById('drop-zone-label').textContent='📎 '+f.name;}
+  });
+  document.getElementById('up-file').addEventListener('change',function(){
+    if(this.files[0]) document.getElementById('drop-zone-label').textContent='📎 '+this.files[0].name;
+  });
+}
+
+// ── Patient View/NCP buttons ──
+document.querySelectorAll('#patient-tbody').forEach(tb=>{
+  tb.addEventListener('click',e=>{
+    const row=e.target.closest('tr');
+    if(!row) return;
+    const name=row.cells[0]?.querySelector('.pt-name')?.textContent||'Patient';
+    if(e.target.textContent==='View') showToast('Viewing '+name,'👤');
+    if(e.target.textContent==='NCP'){navigate('ncp',document.querySelector('[onclick*="ncp"]'));showToast('Opening NCP for '+name,'📋');}
+  });
+});
+
+// ── Dashboard quick action buttons ──
+document.querySelectorAll('#page-dashboard .btn').forEach(btn=>{
+  const t=btn.textContent.trim();
+  if(t.includes('New Patient')) btn.onclick=()=>openModal('patient-modal');
+  if(t.includes('Add Patient')) btn.onclick=()=>openModal('patient-modal');
+  if(t.includes('New Appointment')||t.includes('Schedule')) btn.onclick=()=>openModal('appt-modal');
+  if(t.includes('Create NCP')) btn.onclick=()=>{navigate('ncp',document.querySelector('[onclick*="ncp"]'));showToast('Create a new NCP record','📋');};
+  if(t.includes('Meal Planner')) btn.onclick=()=>navigate('meals',document.querySelector('[onclick*="meals"]'));
+  if(t.includes('Progress Report')) btn.onclick=()=>navigate('progress',document.querySelector('[onclick*="progress"]'));
+  if(t.includes('Full Schedule')||t.includes('View Full')) btn.onclick=()=>navigate('appointments',document.querySelector('[onclick*="appointments"]'));
+  if(t.includes('Review Now')) btn.onclick=()=>showToast('Opening RA 10173 compliance records…','🔍');
+});
+
+// ── Billing new invoice ──
+document.querySelectorAll('#page-billing .btn-primary').forEach(b=>{ if(b.textContent.includes('Invoice')) b.onclick=()=>openModal('inv-modal'); });
+// Appointments schedule button
+document.querySelectorAll('#page-appointments .btn-primary').forEach(b=>{ if(b.textContent.includes('Schedule')) b.onclick=()=>openModal('appt-modal'); });
+// Patients add button
+document.querySelectorAll('#page-patients .btn-primary').forEach(b=>{ if(b.textContent.includes('Patient')) b.onclick=()=>openModal('patient-modal'); });
+
+</script>
+
+<!-- ══ MODAL: UPLOAD RESOURCE ══ -->
+<div class="modal-overlay" id="upload-modal" style="display:none;position:fixed;inset:0;background:rgba(0,77,58,.35);backdrop-filter:blur(4px);z-index:9000;align-items:center;justify-content:center;padding:20px">
+  <div style="background:#FFFEF9;border-radius:20px;width:100%;max-width:520px;box-shadow:0 20px 60px rgba(0,0,0,.2);overflow:hidden">
+    <div style="background:linear-gradient(135deg,#004D3A,#00674F);padding:20px 24px;display:flex;align-items:center;justify-content:space-between">
+      <div>
+        <div style="font-family:'Playfair Display',serif;font-size:17px;font-weight:600;color:#fff">Upload Educational Resource</div>
+        <div style="font-size:12px;color:rgba(255,254,249,.65);margin-top:2px">Share handouts, guides & templates with patients</div>
+      </div>
+      <button onclick="closeModal('upload-modal')" style="width:32px;height:32px;border-radius:8px;border:none;background:rgba(255,255,255,.15);color:#fff;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center">×</button>
+    </div>
+    <form id="upload-form" style="padding:22px 24px">
+      <!-- Drag & Drop Zone -->
+      <div id="drop-zone" onclick="document.getElementById('up-file').click()" style="border:2px dashed var(--cream-border);border-radius:12px;padding:24px;text-align:center;cursor:pointer;transition:all .18s;background:#FFFEF9;margin-bottom:18px">
+        <div style="font-size:32px;margin-bottom:8px">📂</div>
+        <div id="drop-zone-label" style="font-size:13px;font-weight:500;color:var(--green-dark)">Drag & drop or click to browse</div>
+        <div style="font-size:11.5px;color:var(--gray600);margin-top:3px">Supports PDF, DOCX, PPTX, PNG, JPG · Max 20 MB</div>
+        <input type="file" id="up-file" style="display:none" accept=".pdf,.docx,.pptx,.png,.jpg,.jpeg"/>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+        <div style="grid-column:1/-1"><label class="form-label">Resource Title *</label><input class="input-field" id="up-title" placeholder="e.g. Diabetes Meal Plan Week 1" required/></div>
+        <div><label class="form-label">Category *</label>
+          <select class="input-field" id="up-cat" required>
+            <option value="">Select category</option>
+            <option>Clinical Guide</option><option>Patient Education</option><option>Meal Plan</option><option>Template</option><option>Research</option>
+          </select>
+        </div>
+        <div><label class="form-label">File Type *</label>
+          <select class="input-field" id="up-type" required>
+            <option value="">Select type</option>
+            <option>PDF</option><option>DOCX</option><option>PPTX</option><option>Image</option>
+          </select>
+        </div>
+        <div style="grid-column:1/-1"><label class="form-label">Description *</label><textarea class="input-field" id="up-desc" placeholder="Briefly describe this resource and how patients should use it…" style="resize:vertical;min-height:72px"></textarea></div>
+        <div style="grid-column:1/-1"><label class="form-label">Share With</label>
+          <select class="input-field" id="up-share">
+            <option>All My Patients</option><option>T2DM Patients Only</option><option>Hypertension Patients</option><option>CKD Patients</option><option>No one yet (private)</option>
+          </select>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;justify-content:flex-end;padding-top:4px">
+        <button type="button" onclick="closeModal('upload-modal')" class="btn btn-outline">Cancel</button>
+        <button type="submit" class="btn btn-primary" style="gap:7px">
+          <svg style="width:14px;height:14px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          Upload Resource
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ══ MODAL: ADD PATIENT ══ -->
+<div class="modal-overlay" id="patient-modal" style="display:none;position:fixed;inset:0;background:rgba(0,77,58,.35);backdrop-filter:blur(4px);z-index:9000;align-items:center;justify-content:center;padding:20px">
+  <div style="background:#FFFEF9;border-radius:20px;width:100%;max-width:500px;box-shadow:0 20px 60px rgba(0,0,0,.2);overflow:hidden">
+    <div style="background:linear-gradient(135deg,#004D3A,#00674F);padding:18px 24px;display:flex;align-items:center;justify-content:space-between">
+      <div style="font-family:'Playfair Display',serif;font-size:17px;font-weight:600;color:#fff">Add New Patient</div>
+      <button onclick="closeModal('patient-modal')" style="width:32px;height:32px;border-radius:8px;border:none;background:rgba(255,255,255,.15);color:#fff;cursor:pointer;font-size:18px">×</button>
+    </div>
+    <form id="patient-form" style="padding:22px 24px">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div style="grid-column:1/-1"><label class="form-label">Full Name *</label><input class="input-field" id="pt-name" placeholder="e.g. Maria Lourdes Santos" required/></div>
+        <div><label class="form-label">Date of Birth *</label><input class="input-field" type="date" required/></div>
+        <div><label class="form-label">Sex *</label><select class="input-field" required><option value="">Select</option><option>Female</option><option>Male</option><option>Other</option></select></div>
+        <div><label class="form-label">Contact Number</label><input class="input-field" placeholder="+63 9XX XXX XXXX"/></div>
+        <div><label class="form-label">Email Address</label><input class="input-field" type="email" placeholder="patient@email.com"/></div>
+        <div style="grid-column:1/-1"><label class="form-label">Primary Condition</label>
+          <select class="input-field"><option value="">Select diagnosis</option><option>Type 2 Diabetes (T2DM)</option><option>Hypertension</option><option>CKD</option><option>Obesity</option><option>Underweight</option><option>Dyslipidemia</option><option>Other</option></select>
+        </div>
+        <div style="grid-column:1/-1"><label class="form-label">Initial Notes</label><textarea class="input-field" placeholder="Initial assessment notes or referral details…" style="resize:vertical;min-height:60px"></textarea></div>
+      </div>
+      <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:16px">
+        <button type="button" onclick="closeModal('patient-modal')" class="btn btn-outline">Cancel</button>
+        <button type="submit" class="btn btn-primary">Add Patient</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ══ MODAL: NEW APPOINTMENT ══ -->
+<div class="modal-overlay" id="appt-modal" style="display:none;position:fixed;inset:0;background:rgba(0,77,58,.35);backdrop-filter:blur(4px);z-index:9000;align-items:center;justify-content:center;padding:20px">
+  <div style="background:#FFFEF9;border-radius:20px;width:100%;max-width:460px;box-shadow:0 20px 60px rgba(0,0,0,.2);overflow:hidden">
+    <div style="background:linear-gradient(135deg,#C49D00,#EFBF04);padding:18px 24px;display:flex;align-items:center;justify-content:space-between">
+      <div style="font-family:'Playfair Display',serif;font-size:17px;font-weight:600;color:#004D3A">Schedule Appointment</div>
+      <button onclick="closeModal('appt-modal')" style="width:32px;height:32px;border-radius:8px;border:none;background:rgba(0,77,58,.15);color:#004D3A;cursor:pointer;font-size:18px">×</button>
+    </div>
+    <form id="appt-form" style="padding:22px 24px">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div style="grid-column:1/-1"><label class="form-label">Patient *</label>
+          <select class="input-field" required><option value="">Select patient</option><option>Maria Lourdes Santos</option><option>Jose Ramon Cruz</option><option>Ana Luisa Reyes</option><option>Roberto Bautista</option><option>Elena Villanueva</option></select>
+        </div>
+        <div><label class="form-label">Date *</label><input class="input-field" type="date" required/></div>
+        <div><label class="form-label">Time *</label><input class="input-field" type="time" required/></div>
+        <div><label class="form-label">Type</label>
+          <select class="input-field"><option>Initial Assessment</option><option>Follow-up</option><option>Telehealth</option><option>Home Visit</option></select>
+        </div>
+        <div><label class="form-label">Duration</label>
+          <select class="input-field"><option>30 minutes</option><option>45 minutes</option><option>60 minutes</option><option>90 minutes</option></select>
+        </div>
+        <div style="grid-column:1/-1"><label class="form-label">Location / Room</label><input class="input-field" placeholder="e.g. Room 3, Telehealth Link…"/></div>
+        <div style="grid-column:1/-1"><label class="form-label">Notes</label><textarea class="input-field" placeholder="Reason for visit, special instructions…" style="resize:vertical;min-height:56px"></textarea></div>
+      </div>
+      <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:16px">
+        <button type="button" onclick="closeModal('appt-modal')" class="btn btn-outline">Cancel</button>
+        <button type="submit" class="btn btn-gold">Schedule</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ══ MODAL: NEW INVOICE ══ -->
+<div class="modal-overlay" id="inv-modal" style="display:none;position:fixed;inset:0;background:rgba(0,77,58,.35);backdrop-filter:blur(4px);z-index:9000;align-items:center;justify-content:center;padding:20px">
+  <div style="background:#FFFEF9;border-radius:20px;width:100%;max-width:440px;box-shadow:0 20px 60px rgba(0,0,0,.2);overflow:hidden">
+    <div style="background:linear-gradient(135deg,#004D3A,#00674F);padding:18px 24px;display:flex;align-items:center;justify-content:space-between">
+      <div style="font-family:'Playfair Display',serif;font-size:17px;font-weight:600;color:#fff">Create Invoice</div>
+      <button onclick="closeModal('inv-modal')" style="width:32px;height:32px;border-radius:8px;border:none;background:rgba(255,255,255,.15);color:#fff;cursor:pointer;font-size:18px">×</button>
+    </div>
+    <form id="inv-form" style="padding:22px 24px">
+      <div style="display:grid;gap:12px">
+        <div><label class="form-label">Patient *</label>
+          <select class="input-field" required><option value="">Select patient</option><option>Maria Lourdes Santos</option><option>Jose Ramon Cruz</option><option>Ana Luisa Reyes</option><option>Roberto Bautista</option></select>
+        </div>
+        <div><label class="form-label">Service Description *</label><input class="input-field" placeholder="e.g. Initial Assessment + MNT Consultation" required/></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div><label class="form-label">Amount (₱) *</label><input class="input-field" type="number" placeholder="2500" required/></div>
+          <div><label class="form-label">Due Date *</label><input class="input-field" type="date" required/></div>
+        </div>
+        <div><label class="form-label">Payment Method</label>
+          <select class="input-field"><option>Cash</option><option>GCash</option><option>Maya</option><option>Bank Transfer</option><option>PhilHealth</option></select>
+        </div>
+        <div><label class="form-label">Notes</label><input class="input-field" placeholder="Optional billing notes…"/></div>
+      </div>
+      <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:16px">
+        <button type="button" onclick="closeModal('inv-modal')" class="btn btn-outline">Cancel</button>
+        <button type="submit" class="btn btn-primary">Create Invoice</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ══ MODAL: SIGN OUT ══ -->
+<div class="modal-overlay" id="signout-modal" style="display:none;position:fixed;inset:0;background:rgba(0,51,40,.45);backdrop-filter:blur(6px);z-index:9999;align-items:center;justify-content:center;padding:20px">
+  <div style="background:#FFFEF9;border-radius:22px;width:100%;max-width:400px;box-shadow:0 24px 64px rgba(0,0,0,.22);overflow:hidden;animation:fadeIn .2s ease">
+    <!-- Header -->
+    <div style="background:linear-gradient(135deg,#003328 0%,#004D3A 100%);padding:26px 28px 22px;text-align:center;position:relative">
+      <div style="width:56px;height:56px;background:rgba(220,38,38,.15);border:2px solid rgba(220,38,38,.3);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 12px">
+        <svg style="width:24px;height:24px;color:#ff6b6b" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      </div>
+      <div style="font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:#FFFFFF;margin-bottom:6px">Sign Out?</div>
+      <div style="font-size:12.5px;color:rgba(255,254,249,.55);line-height:1.6">You are about to sign out of your NutriMatch RND account. Any unsaved changes will be lost.</div>
+    </div>
+    <!-- User Info Strip -->
+    <div style="background:#F9FAFB;border-bottom:1px solid var(--cream-border);padding:14px 24px;display:flex;align-items:center;gap:12px">
+      <div style="width:40px;height:40px;border-radius:10px;background:linear-gradient(135deg,#C49D00,#EFBF04);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:#003328;flex-shrink:0">KP</div>
+      <div>
+        <div style="font-size:13.5px;font-weight:600;color:#003328">Kristine Perez, RND</div>
+        <div style="font-size:11.5px;color:var(--gray600)">k.perez@nutrimatch.ph &nbsp;·&nbsp; Clinical Dietitian</div>
+      </div>
+      <span style="margin-left:auto;font-size:10px;font-weight:600;background:#E6F2EF;color:#00674F;padding:3px 9px;border-radius:20px">Active</span>
+    </div>
+    <!-- Actions -->
+    <div style="padding:22px 24px;display:flex;flex-direction:column;gap:10px">
+      <button onclick="confirmSignOut()" style="width:100%;padding:12px;background:#DC2626;color:#fff;border:none;border-radius:12px;font-size:13.5px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;display:flex;align-items:center;justify-content:center;gap:8px;transition:all .18s" onmouseover="this.style.background='#B91C1C'" onmouseout="this.style.background='#DC2626'">
+        <svg style="width:16px;height:16px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Yes, Sign Me Out
+      </button>
+      <button onclick="closeModal('signout-modal')" style="width:100%;padding:12px;background:var(--green-muted);color:var(--green-dark);border:1.5px solid #b3d9cf;border-radius:12px;font-size:13.5px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .18s" onmouseover="this.style.background='#b3d9cf'" onmouseout="this.style.background='var(--green-muted)'">
+        Stay Logged In
+      </button>
+      <div style="text-align:center;padding-top:4px">
+        <span style="font-size:11px;color:var(--gray400)">🔒 Your session is encrypted and secure</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function confirmSignOut(){
+  closeModal('signout-modal');
+  // Show sign-out overlay
+  const overlay = document.createElement('div');
+  overlay.style.cssText='position:fixed;inset:0;background:#003328;z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px';
+  overlay.innerHTML=`
+    <div style="width:64px;height:64px;background:linear-gradient(135deg,#C49D00,#EFBF04);border-radius:16px 4px 16px 4px;display:flex;align-items:center;justify-content:center;margin-bottom:8px;animation:fadeIn .3s ease">
+      <svg style="width:32px;height:32px;fill:#003328" viewBox="0 0 24 24"><path d="M17 8C8 10 5.9 16.17 3.82 21.34c5.44-5.98 12.34-8.24 13.18-13.34zM12 2a9.96 9.96 0 0 0-7.07 2.93C7 6 8.5 6 10 5c-1 3-4 4.5-4 9 0 5.52 4.48 10 10 10S26 19.52 26 14C26 7.37 19.63 2 12 2z"/></svg>
+    </div>
+    <div style="font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:#FDFBD4">Signing you out…</div>
+    <div style="font-size:13px;color:rgba(253,251,212,.45)">Thank you for using NutriMatch, Kristine.</div>
+    <div style="width:200px;height:3px;background:rgba(255,255,255,.1);border-radius:2px;overflow:hidden;margin-top:8px">
+      <div id="logout-bar" style="height:100%;width:0%;background:linear-gradient(90deg,#00674F,#EFBF04);border-radius:2px;transition:width 1.8s ease"></div>
+    </div>`;
+  document.body.appendChild(overlay);
+  setTimeout(()=>{ document.getElementById('logout-bar').style.width='100%'; },50);
+  setTimeout(()=>{
+    overlay.innerHTML+=`<div style="font-size:12px;color:rgba(253,251,212,.4);margin-top:12px">Redirecting to login…</div>`;
+    setTimeout(()=>{ overlay.remove(); showLoginScreen(); },1000);
+  },2000);
+}
+
+function showLoginScreen(){
+  // Replace entire app with a login page
+  document.body.style.overflow='auto';
+  document.querySelector('.sidebar').style.display='none';
+  document.querySelector('.main').style.display='none';
+
+  const login = document.createElement('div');
+  login.style.cssText='position:fixed;inset:0;background:linear-gradient(135deg,#003328 0%,#004D3A 50%,#00674F 100%);display:flex;align-items:center;justify-content:center;z-index:99999;font-family:DM Sans,sans-serif';
+  login.innerHTML=`
+    <div style="background:#FFFEF9;border-radius:24px;width:100%;max-width:420px;overflow:hidden;box-shadow:0 32px 80px rgba(0,0,0,.3);margin:20px">
+      <!-- Logo Header -->
+      <div style="background:linear-gradient(135deg,#003328,#004D3A);padding:36px 32px 28px;text-align:center">
+        <div style="display:inline-flex;align-items:center;gap:10px;margin-bottom:16px">
+          <div style="width:44px;height:44px;background:linear-gradient(135deg,#C49D00,#EFBF04);border-radius:12px 3px 12px 3px;display:flex;align-items:center;justify-content:center">
+            <svg style="width:22px;height:22px;fill:#003328" viewBox="0 0 24 24"><path d="M17 8C8 10 5.9 16.17 3.82 21.34c5.44-5.98 12.34-8.24 13.18-13.34zM12 2a9.96 9.96 0 0 0-7.07 2.93C7 6 8.5 6 10 5c-1 3-4 4.5-4 9 0 5.52 4.48 10 10 10S26 19.52 26 14C26 7.37 19.63 2 12 2z"/></svg>
+          </div>
+          <span style="font-family:'Playfair Display',serif;font-size:24px;font-weight:700;color:#FDFBD4">NutriMatch</span>
+        </div>
+        <div style="font-size:12px;color:rgba(253,251,212,.4);letter-spacing:1.5px;text-transform:uppercase">RND Clinical Portal</div>
+      </div>
+      <!-- Login Form -->
+      <div style="padding:32px">
+        <div style="font-family:'Playfair Display',serif;font-size:20px;font-weight:600;color:#003328;margin-bottom:4px">Welcome back</div>
+        <div style="font-size:13px;color:#6B7280;margin-bottom:24px">Sign in to your RND account</div>
+        <div style="margin-bottom:14px">
+          <label style="font-size:11px;font-weight:600;color:#6B7280;text-transform:uppercase;letter-spacing:.6px;display:block;margin-bottom:5px">Email Address</label>
+          <input type="email" value="k.perez@nutrimatch.ph" style="width:100%;border:1.5px solid #DDD98A;border-radius:9px;padding:10px 14px;font-size:13.5px;font-family:DM Sans,sans-serif;color:#003328;background:#fff;outline:none;box-sizing:border-box"/>
+        </div>
+        <div style="margin-bottom:20px">
+          <label style="font-size:11px;font-weight:600;color:#6B7280;text-transform:uppercase;letter-spacing:.6px;display:block;margin-bottom:5px">Password</label>
+          <input type="password" value="••••••••••" style="width:100%;border:1.5px solid #DDD98A;border-radius:9px;padding:10px 14px;font-size:13.5px;font-family:DM Sans,sans-serif;color:#003328;background:#fff;outline:none;box-sizing:border-box"/>
+        </div>
+        <button id="login-btn" onclick="restoreApp()" style="width:100%;padding:13px;background:linear-gradient(135deg,#00674F,#00896A);color:#FDFBD4;border:none;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;font-family:DM Sans,sans-serif;letter-spacing:.2px;transition:all .2s">Sign In to NutriMatch</button>
+        <div style="text-align:center;margin-top:16px;font-size:12px;color:#9CA3AF">Forgot password? <span style="color:#00674F;font-weight:600;cursor:pointer">Reset here</span></div>
+        <div style="margin-top:20px;padding-top:16px;border-top:1px solid #F3F4F6;text-align:center;font-size:11px;color:#9CA3AF">🔒 Secured under RA 10173 · Data Privacy Act of 2012</div>
+      </div>
+    </div>`;
+  document.body.appendChild(login);
+  window._loginOverlay = login;
+}
+
+function restoreApp(){
+  if(window._loginOverlay) window._loginOverlay.remove();
+  document.querySelector('.sidebar').style.display='flex';
+  document.querySelector('.main').style.display='flex';
+  navigate('dashboard', document.querySelector('[onclick*=dashboard]') || document.querySelector('.nav-item'));
+  showToast('Welcome back, Kristine! 🌿','✅');
+}
+</script>
+
+</body>
+</html>
